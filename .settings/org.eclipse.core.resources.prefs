@@ -1,0 +1,13 @@
+eclipse.preferences.version=1
+encoding//grammar/basic.py=utf-8
+encoding//grammar/keywords.py=utf-8
+encoding//grammar/parsed.py=utf-8
+encoding//grammar/symbols.py=utf-8
+encoding//grammar/test_grammar.py=utf-8
+encoding//grammar/theory_grammar.py=utf-8
+encoding//preference/comparison.py=utf-8
+encoding//preference/graph.py=utf-8
+encoding//preference/interval.py=utf-8
+encoding//preference/rule.py=utf-8
+encoding//preference/test.py=utf-8
+encoding//preference/theory.py=utf-8

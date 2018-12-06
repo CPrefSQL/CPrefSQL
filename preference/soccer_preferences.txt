@@ -1,0 +1,5 @@
+(funcao = 'atacante') > (funcao <> 'atacante')[nome, gols, liga]
+AND
+IF (funcao = 'armador')  THEN (gols > 20) > (gols <= 20)[nome]
+AND
+IF (funcao = 'atacante') THEN (gols > 30) > (gols <= 30)[nome]
