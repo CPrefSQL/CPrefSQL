@@ -5,11 +5,9 @@ Module to manipulate intervals of values.
 
 The intervals are stored as tuples.
 The intervals are associated to comparisons as:
-A = x,
-A <> x,
-A OP x, x OP A OP x' (where OP is < or <=)
-A > x, A >= x
-None represent infinity values
+(A = x), (A <> x), (A < x), (A <= x), )A > x), (A >= x)
+(x OP A OP x') where OP is < or <=,
+None represents infinity values
 '''
 
 from grammar.symbols import EQUAL_OP, DIFFERENT_OP, LESS_OP,\
@@ -50,7 +48,7 @@ def _interval_intersect(interval1, interval2):
     intersection = True
     # Check both intervals are (A, =, =, v)
     if interval1[1] == EQUAL_OP and interval2[1] == EQUAL_OP \
-            and interval1[0] <> interval2[0]:
+            and interval1[0] != interval2[0]:
         intersection = False
     # Check if interval1 is (A, <>, <>, v) and interval2 is (A, =, =, v)
     elif interval1[1] == DIFFERENT_OP and interval2[1] == EQUAL_OP \
@@ -133,7 +131,7 @@ def intersect(item1, item2):
     elif isinstance(item2, tuple):
         # Check if item1 is inside item2 (interval)
         return _is_inside_interval(item1, item2)
-    # Check if items are the same (both are nore intervals)
+    # Check if items are the same (both are none intervals)
     return item1 == item2
 
 

@@ -176,7 +176,7 @@ class CPRule(object):
         # Initialize rule preference
         self._preference = CPPreference(parsed_rule.best,
                                         parsed_rule.worst,
-                                        parsed_rule.get_indifferent)
+                                        parsed_rule.indifferent)
 
     def __str__(self):
         rule_str = ''
@@ -236,15 +236,15 @@ class CPRule(object):
         pref = self._preference
         pref_att = pref.get_preference_attribute()
         best_interval = pref.get_best_interval()
-        if cond.is_satisfied_by(record) and \
-                pref_att in record and \
-                intersect(best_interval, record[pref_att]):
-            new_record = record.copy()
-            new_record[pref_att] = pref.get_worst_interval()
-            for att in pref.get_indifferent_set():
-                if att in new_record:
-                    del new_record[att]
-            return new_record
+        if cond is None or cond.is_satisfied_by(record):
+            if pref_att in record and \
+                    intersect(best_interval, record[pref_att]):
+                new_record = record.copy()
+                new_record[pref_att] = pref.get_worst_interval()
+                for att in pref.get_indifferent_set():
+                    if att in new_record:
+                        del new_record[att]
+                return new_record
         return None
 
     def get_atomic_formulas_list(self):
@@ -287,34 +287,6 @@ class CPRule(object):
                 and not self._condition.is_compatible(other.get_condition()):
             return False
         return True
-
-#     def formula_dominates(self, formula1, formula2):
-#         '''
-#         Returns True if formula1 dominates (is preferred to) formula2
-#         according to rule
-#         '''
-#         # Check if formula1 has preferred value
-#         # and other formula1 has non preferred value
-#         pref = self._preference
-#         if not pref.is_best_satisfied_by(formula1) or \
-#                 not pref.is_worst_satisfied_by(formula2):
-#             return False
-#         # Check if formulas satisfy rule conditions
-#         cond = self._condition
-#         if not cond.is_satisfied_by(formula1) or \
-#                 not cond.is_satisfied_by(formula2):
-#             return False
-#         # Check if all another attributes are equal except
-#       # Preference attribute, condition attributes and indifferent attributes
-#         att_set = set(formula1.keys() + formula2.keys())
-#         att_set = att_set.difference(set([pref.get_preference_attribute()]))
-#         att_set = att_set.difference(pref.get_indifferent_set())
-#         for att in att_set:
-#             if att not in formula1 or \
-#                     att not in formula2 or \
-#                     formula1[att] != formula2[att]:
-#                 return False
-#         return True
 
     def dominates(self, record1, record2):
         '''

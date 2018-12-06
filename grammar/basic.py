@@ -49,7 +49,7 @@ def identifier_token():
     # Identifier begin with letter and have letters, numbers or underline
     identifier_tok = Word(alphas + UNDERLINE, alphanums + UNDERLINE)
     # Convert identifier to upper case
-    identifier_tok.setParseAction(lambda t: t[0].upper())
+    identifier_tok.setParseAction(lambda t: t[0].lower())
     return identifier_tok
 
 

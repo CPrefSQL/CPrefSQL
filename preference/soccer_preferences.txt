@@ -1,5 +1,5 @@
-(funcao = 'atacante') > (funcao <> 'atacante')[nome, gols, liga]
+(function = 'attack') > (function <> 'attack')[name, goals, league]
 AND
-IF (funcao = 'armador')  THEN (gols > 20) > (gols <= 20)[nome]
+IF (function = 'mid-field')  THEN (goals > 20) > (goals <= 20)[name]
 AND
-IF (funcao = 'atacante') THEN (gols > 30) > (gols <= 30)[nome]
+IF (function = 'attack') THEN (goals > 30) > (goals <= 30)[name]

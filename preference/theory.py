@@ -7,6 +7,8 @@ Module to manipulate conditional preference theories (cp-theories)
 from preference.graph import PreferenceGraph
 from preference.comparison import build_comparison, Comparison
 from preference.interval import intersect
+from grammar.theory_grammar import TheoryGrammar
+from preference.rule import CPRule
 
 
 class CPTheory(object):
@@ -275,15 +277,6 @@ class CPTheory(object):
                             " -> t" + str(index2 + 1)
         return str_btg
 
-#     def _direct_dominates(self, record1, record2):
-#         '''
-#         Check if record1 dominates directly by one rule record2
-#         '''
-#         for rule in self._rule_list:
-#             if rule.record_dominates(record1, record2):
-#                 return True
-#         return False
-
 
 def _build_interval_graph(rule_list):
     '''
@@ -308,33 +301,13 @@ def is_goal_record(curren_record, goal_record):
     correspondent goal attributes
     Indifferent attributes of goal are ignored
     '''
-    for att in goal_record:
-        if att not in curren_record:
-            return False
-        # Check if there is intersection in attribute values
-        if intersect(goal_record[att], curren_record[att]):
+    for att in curren_record:
+        if att not in goal_record \
+                or intersect(goal_record[att], curren_record[att]):
             continue
         else:
             return False
     return True
-
-
-# def is_goal_formula(formula, goal_formula):
-#     '''
-#     Check if first formula reaches goal formula
-#
-#     A formula reaches a goal if its attributes are inside or equal of
-#     correspondent goal attributes
-#     '''
-#     for att in formula:
-#         # Check attribute presents in goal (indifferent ones were dropped)
-#         if att in goal_formula:
-#             value = formula[att]
-#             goal_value = goal_formula[att]
-#             # check if record attribute is inside or equal to goal attribute
-#             if goal_value.is_inside_or_equal(value):
-#                 return False
-#     return True
 
 
 def _combine_transitive(set1, set2):
@@ -378,3 +351,16 @@ def _dominates_by_search(rule_list, record1, record2):
             if _dominates_by_search(new_rule_list, new_rec, record2):
                 return True
     return False
+
+
+def build_cptheory(preference_text):
+    '''
+    Build a cp-theory from a text
+    '''
+    parsed = TheoryGrammar.parse(preference_text)
+    if parsed is not None:
+        rule_list = []
+        for parsed_rule in parsed:
+            cp_rule = CPRule(parsed_rule)
+            rule_list.append(cp_rule)
+    return CPTheory(rule_list)

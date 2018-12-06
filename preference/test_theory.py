@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-Module for grammar testing
+Module for cp-theory testing
 '''
 
 import os
