@@ -8,7 +8,35 @@ from pyparsing import Suppress, Word, alphas, alphanums, \
     oneOf, nums, Optional, sglQuotedString, Combine
 
 from grammar.symbols import MINUS_OP, COMPARISON_OP_SET
-from grammar.parsed import ParsedPredicate
+from preference.interval import parse_interval, get_str_predicate
+
+
+class ParsedPredicate(object):
+    '''
+    Class to represent parsed predicates
+    '''
+
+    def __init__(self, term):
+        self._attribute = term.attribute
+        self._interval = parse_interval(term)
+
+    def __str__(self):
+        return get_str_predicate(self._attribute, self._interval)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def get_attribute(self):
+        '''
+        Return the predicate attribute
+        '''
+        return self._attribute
+
+    def get_interval(self):
+        '''
+        Return the predicate interval
+        '''
+        return self._interval
 
 
 def identifier_token():

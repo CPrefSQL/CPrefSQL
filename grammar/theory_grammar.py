@@ -6,8 +6,7 @@ Module for conditional preference theory grammar
 from pyparsing import Suppress, Optional, delimitedList, Group, \
     ParseException
 from grammar.basic import predicate_term, identifier_token
-from grammar.symbols import GREATER_OP
-from grammar.keywords import IF_KEYWORD, AND_KEYWORD, \
+from grammar.symbols import GREATER_OP, IF_KEYWORD, AND_KEYWORD, \
     THEN_KEYWORD, BETTER_KEYWORD
 from grammar.symbols import LEFT_BRA, RIGHT_BRA, LEFT_PAR, \
     RIGHT_PAR, COMMA

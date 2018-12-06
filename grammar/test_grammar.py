@@ -4,7 +4,6 @@
 Module for grammar testing
 '''
 
-# import logging
 import os
 import sys
 from pyparsing import ParseException

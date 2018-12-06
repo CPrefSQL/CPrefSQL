@@ -3,8 +3,10 @@
 Module to define symbols
 '''
 
+from pyparsing import Keyword
+
+
 # Preference keywords
-TOP_SYM = 'TOP'
 ACCORDING_SYM = 'ACCORDING'
 TO_SYM = 'TO'
 PREFERENCES_SYM = 'PREFERENCES'
@@ -13,46 +15,13 @@ AND_SYM = 'AND'
 THEN_SYM = 'THEN'
 BETTER_SYM = 'BETTER'
 PREFERENCES_SYM_SET = \
-    set([TOP_SYM,
+    set([
          ACCORDING_SYM,
          TO_SYM,
          PREFERENCES_SYM,
          IF_SYM,
          THEN_SYM,
          BETTER_SYM])
-
-
-# Query keywords
-# Select ... from ... where
-SELECT_SYM = 'SELECT'
-DISTINCT_SYM = 'DISTINCT'
-FROM_SYM = 'FROM'
-WHERE_SYM = 'WHERE'
-GROUP_SYM = 'GROUP'
-AS_SYM = 'AS'
-NOT_SYM = 'NOT'
-OR_SYM = 'OR'
-BY_SYM = 'BY'
-SIMPLE_QUERY_SYM_SET = \
-    set([SELECT_SYM,
-        DISTINCT_SYM,
-        FROM_SYM,
-        WHERE_SYM,
-        GROUP_SYM,
-        BY_SYM,
-        AS_SYM,
-        NOT_SYM,
-        OR_SYM,
-        AND_SYM]).union(PREFERENCES_SYM_SET)
-
-
-# Bag
-UNION_SYM = 'UNION'
-INTERSECT_SYM = 'INTERSECT'
-EXCEPT_SYM = 'EXCEPT'
-BAG_SYM_SET = set([UNION_SYM, INTERSECT_SYM, EXCEPT_SYM])
-
-QUERY_SYM_SET = SIMPLE_QUERY_SYM_SET.union(BAG_SYM_SET)
 
 # Symbols
 LEFT_BRA = '['
@@ -90,11 +59,9 @@ INTERVAL_OP_SET = set([LESS_OP, LESS_EQUAL_OP])
 
 MINUS_OP = '-'
 
-RESERVERD_SYM_SET = QUERY_SYM_SET
 
-
-def is_reserved_word(word):
-    '''
-    Check if 'keyword' is a reserved keyword
-    '''
-    return word.upper() in RESERVERD_SYM_SET
+# Grammar keywords
+AND_KEYWORD = Keyword(AND_SYM, caseless=True)
+BETTER_KEYWORD = Keyword(BETTER_SYM, caseless=True)
+IF_KEYWORD = Keyword(IF_SYM, caseless=True)
+THEN_KEYWORD = Keyword(THEN_SYM, caseless=True)
