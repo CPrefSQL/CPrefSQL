@@ -17,7 +17,7 @@ class TheoryGrammar(object):
     Class for cp-theory grammar
 
     <theory-grammar> ::= <rule-term> {'AND' <rule-term>}*
-    <rule-term> ::= [<antecedent>] <preference> [<indifferent-list>]
+    <rule-term> ::= [<condition-term>] <preference> [<indifferent-list>]
     <condition-term> ::= 'IF' <predicate> {'AND' <predicate>}* 'THEN'
     <preference-term> ::=
         <predicate> 'BETTER' <predicate>' |

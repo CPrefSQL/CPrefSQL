@@ -43,7 +43,7 @@ def identifier_token():
     '''
     Grammar for identifiers
 
-    {[A-Z]|[a-z]|_)([A-Z]|[a-z]|[0-9]|_}*
+    {[A-Z]|[a-z]|_)}{([A-Z]|[a-z]|[0-9]|_}*
     '''
     from grammar.symbols import UNDERLINE
     # Identifier begin with letter and have letters, numbers or underline
@@ -87,9 +87,9 @@ def value_term():
     A value is an integer, a float or a string
     '''
     integer_tok = integer_value()
-    integer_tok.setParseAction(lambda t: int(t[0]))
+#     integer_tok.setParseAction(lambda t: int(t[0]))
     float_token = float_value()
-    float_token.setParseAction(lambda t: float(t[0]))
+#     float_token.setParseAction(lambda t: float(t[0]))
     string_tok = string_value()
     value_tok = (string_tok | float_token | integer_tok)
     return value_tok

@@ -7,8 +7,8 @@ Module to manipulate conditional preference theories (cp-theories)
 from preference.graph import PreferenceGraph
 from preference.comparison import build_comparison, Comparison
 from preference.interval import intersect
-from grammar.theory_grammar import TheoryGrammar
 from preference.rule import CPRule
+from grammar.theory_grammar import TheoryGrammar
 
 
 class CPTheory(object):
