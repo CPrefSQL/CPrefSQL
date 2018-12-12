@@ -290,6 +290,7 @@ def _build_interval_graph(rule_list):
         pref = rule.get_preference()
         graph.add_edge(pref.get_best_interval(),
                        pref.get_worst_interval())
+    graph.update_intersections()
     return graph
 
 

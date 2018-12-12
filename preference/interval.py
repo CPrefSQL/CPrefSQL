@@ -70,8 +70,9 @@ def _interval_intersect(interval1, interval2):
             and interval1[1] in [LESS_OP, LESS_EQUAL_OP] \
             and not _is_inside_interval(interval2[0], interval1):
         intersection = False
-    # Both intervals are (A, <, <=, None) or (A, <=, <=, None)
-    else:
+    # Both intervals are (A, <=, <=, None) or (A, <=, <=, None)
+    elif interval1[1] in [LESS_OP, LESS_EQUAL_OP] \
+            and interval2[1] in [LESS_OP, LESS_EQUAL_OP]:
         # Sort intervals
         if interval2[0] < interval1[0]:
             interval1, interval2 = interval2, interval1

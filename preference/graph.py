@@ -82,3 +82,22 @@ class PreferenceGraph(object):
             if self.depth_first_search(vertex, vertex):
                 return False
         return True
+
+    def update_intersections(self):
+        '''
+        Update interval intersections
+        '''
+        # For every vertex ve1
+        for ve1 in self._graph_dict:
+            # New list of vertex do create edges from ve1
+            new_list = []
+            # For every vertex ve2 in edges ve1 -> ve2
+            for ve2 in self._graph_dict[ve1]:
+                # For every vertex ve3
+                for ve3 in self._graph_dict:
+                    # Check if ve2 is different of ve3
+                    # And if there is intersection in their intervals
+                    if ve2 != ve3 and intersect(ve2, ve3):
+                        new_list.append(ve3)
+            # Create edges from ve1 to vetices in new list
+            self._graph_dict[ve1] += new_list
