@@ -1,0 +1,7 @@
+(function = 'attack') > (function <> 'attack')[name, goals, league]
+AND
+IF (function = 'mid-field')  THEN (goals > 20) > (goals <= 20)[name]
+AND
+IF (function = 'attack') THEN (goals > 30) > (goals <= 30)[name]
+AND
+(function = 'defense') > (function = 'attack')[name, goals, league]
