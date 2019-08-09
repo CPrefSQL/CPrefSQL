@@ -86,6 +86,7 @@ def _after_left(value, interval):
     Check if value is after left interval limit
     '''
     if interval[0] is None \
+            or value is None \
             or interval[0] < value \
             or (interval[0] <= value and
                 EQUAL_OP in interval[1]):

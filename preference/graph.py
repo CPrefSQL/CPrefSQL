@@ -99,5 +99,5 @@ class PreferenceGraph(object):
                     # And if there is intersection in their intervals
                     if ve2 != ve3 and intersect(ve2, ve3):
                         new_list.append(ve3)
-            # Create edges from ve1 to vetices in new list
+            # Create edges from ve1 to vertices in new list
             self._graph_dict[ve1] += new_list

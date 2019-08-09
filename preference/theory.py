@@ -160,7 +160,7 @@ class CPTheory(object):
                 if idx1 != idx2:
                     for rule in self._rule_list:
                         # Check if formula1 dominates formula2
-                        if rule.formula_dominates(formula1, formula2):
+                        if rule.dominates(formula1, formula2):
                             comp = build_comparison(formula1, formula2, rule)
                             tmp_set.add(comp)
                 comp_dict[idx1][idx2] = tmp_set

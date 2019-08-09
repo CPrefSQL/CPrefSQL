@@ -251,7 +251,9 @@ class CPRule(object):
         '''
         Get atomic formulas in rule
         '''
-        formulas_list = self._condition.get_atomic_formulas_list()
+        formulas_list = []
+        if self._condition:
+            formulas_list += self._condition.get_atomic_formulas_list()
         formula = {self._preference.get_preference_attribute():
                    self._preference.get_best_interval()}
         formulas_list.append(formula)
@@ -301,9 +303,10 @@ class CPRule(object):
             return False
         # Check if formulas satisfy rule conditions
         cond = self._condition
-        if not cond.is_satisfied_by(record1) or \
-                not cond.is_satisfied_by(record2):
-            return False
+        if cond:
+            if not cond.is_satisfied_by(record1) or \
+                    not cond.is_satisfied_by(record2):
+                return False
         # Check if all another attributes are equal except
         # Preference attribute and indifferent attributes
         att_set = set(record1.keys() + record2.keys())

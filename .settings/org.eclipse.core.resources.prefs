@@ -1,6 +1,8 @@
 eclipse.preferences.version=1
 encoding//algorithms/nested_loops.py=utf-8
+encoding//algorithms/partition.py=utf-8
 encoding//algorithms/test_nested_loops.py=utf-8
+encoding//algorithms/test_partition.py=utf-8
 encoding//grammar/basic.py=utf-8
 encoding//grammar/symbols.py=utf-8
 encoding//grammar/test_grammar.py=utf-8

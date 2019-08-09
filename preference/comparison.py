@@ -3,6 +3,9 @@
 Module to manipulate comparisons
 '''
 
+from preference.interval import get_str_predicate
+from preference.interval import intersect
+
 
 class Comparison(object):
     '''
@@ -74,13 +77,13 @@ class Comparison(object):
         '''
         Check if record satisfies preferred values
         '''
-        return _is_formula_valid_by_record(self._best_formula_dict, record)
+        return _is_record_valid_by_formula(self._best_formula_dict, record)
 
     def is_worst_record(self, record):
         '''
         Check if record satisfies non preferred values
         '''
-        return _is_formula_valid_by_record(self._worst_formula_dict, record)
+        return _is_record_valid_by_formula(self._worst_formula_dict, record)
 
     def dominates(self, record1, record2):
         '''
@@ -109,8 +112,8 @@ class Comparison(object):
         '''
         Return True if self is more generic than other, otherwise return False
 
-        A comparison b: f+ > f-[W] (self) is more generic than
-        b': g+^a+ > g-^a-[W2] (other) if (1) or (2).
+        A comparison b: f+ > f- [W] (self) is more generic than b':
+        g+^a+ > g-^a-[W2] (other) if (1) or (2).
           (1) g+ = f+, g-= f-, a+ = a- and W2 is subset of W
           (2) g+ = f+, g- = f-, (Attr(a+) union W2) is subset of W
               and (Attr(a-) union W2) is subset of W
@@ -148,6 +151,36 @@ class Comparison(object):
                 return True
         return False
 
+    def is_best_formula(self, formula):
+        '''
+        Check if record satisfies preferred values
+        '''
+        return _is_record_valid_by_formula(self._best_formula_dict, formula)
+
+    def is_worst_formula(self, formula):
+        '''
+        Check if record satisfies non preferred values
+        '''
+        return _is_record_valid_by_formula(self._worst_formula_dict, formula)
+
+
+def _is_formula_valid_by_formula(formula, formula2):
+    '''
+    Return True if the record satisfies the formula, else return False
+    '''
+    # For each formula proposition attribute
+    for att in formula:
+        # Take the interval of attribute in the formula
+        interval = formula[att]
+        # Check if attribute does not exists in record or
+        # if record attribute value does not match with correspondent
+        # formula interval
+        if att not in formula2 or \
+                not intersect(interval, formula2[att]):
+            return False
+    # Returns true if all attributes are ok
+    return True
+
 
 def get_string_formula(formula):
     '''
@@ -156,7 +189,7 @@ def get_string_formula(formula):
     attribution_list = []
     for att in formula:
         interval = formula[att]
-        attribution_list.append(interval.get_string(att))
+        attribution_list.append(get_str_predicate(att, interval))
     return '(' + ')^('.join(attribution_list) + ')'
 
 
@@ -171,7 +204,7 @@ def get_difference_formula(big_formula, small_formula):
     return formula
 
 
-def _is_formula_valid_by_record(formula, record):
+def _is_record_valid_by_formula(formula, record):
     '''
     Return True if the record satisfies the formula, else return False
     '''
@@ -183,7 +216,7 @@ def _is_formula_valid_by_record(formula, record):
         # if record attribute value does not match with correspondent
         # formula interval
         if att not in record or \
-                not interval.is_inside_or_equal(record[att]):
+                not intersect(interval, record[att]):
             return False
     # Returns true if all attributes are ok
     return True
