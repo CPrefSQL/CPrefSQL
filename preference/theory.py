@@ -11,6 +11,7 @@ from preference.rule import CPRule
 from grammar.theory_grammar import TheoryGrammar
 
 
+# TODO: implement debug log
 class CPTheory(object):
     '''
     Class to represent a conditional preference theory
