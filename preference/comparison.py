@@ -7,6 +7,7 @@ from preference.interval import get_str_predicate
 from preference.interval import intersect
 
 
+# TODO: check name of class attributes
 class Comparison(object):
     '''
     Class to represent comparisons
