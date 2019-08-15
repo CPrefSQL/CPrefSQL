@@ -7,6 +7,7 @@ from grammar.symbols import IF_SYM, THEN_SYM
 from preference.interval import get_str_predicate, intersect
 
 
+# TODO: Join in a single class
 class CPCondition(object):
     '''
     Class to represent rule condition
