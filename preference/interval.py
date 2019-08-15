@@ -14,6 +14,10 @@ from grammar.symbols import EQUAL_OP, DIFFERENT_OP, LESS_OP,\
     LESS_EQUAL_OP, GREATER_OP
 
 
+MINUS_INF = float('-inf')
+PLUS_INF = float('+inf')
+
+
 def parse_interval(term):
     '''
     Parse a token term to interval
@@ -25,68 +29,137 @@ def parse_interval(term):
         if term.operator in [EQUAL_OP, DIFFERENT_OP]:
             return (term.value, term.operator, term.operator, term.value)
         # Comparisons: A < x or A <= x
-        # Intervals: (None, <=, <, x) or (None, <=, <=, x)
+        # Intervals: (-inf, <=, <, x) or (-inf, <=, <=, x)
         elif term.operator in [LESS_OP, LESS_EQUAL_OP]:
-            return (None, LESS_EQUAL_OP, term.operator, term.value)
+            return (MINUS_INF, LESS_EQUAL_OP, term.operator, term.value)
         # Comparison: A > x
-        # Interval: (x, <, <=, None)
+        # Interval: (x, <, <=, +inf)
         elif term.operator == GREATER_OP:
-            return (term.value, LESS_OP, LESS_EQUAL_OP, None)
+            return (term.value, LESS_OP, LESS_EQUAL_OP, PLUS_INF)
         # Comparison: A >= x
-        # Interval: (x, <=, <=, None)
-        return (term.value, LESS_EQUAL_OP, LESS_EQUAL_OP, None)
+        # Interval: (x, <=, <=, +inf)
+        return (term.value, LESS_EQUAL_OP, LESS_EQUAL_OP, PLUS_INF)
     # Comparisons: x OP A OP x'
     # Intervals: (x, OP, OP, x')
     return (term.left_value, term.left_operator,
             term.right_operator, term.right_value)
 
 
+# def _interval_intersect(interval1, interval2):
+#     '''
+#     Check if there is interval intersection
+#     '''
+#     intersection = True
+#     # Check if interval1 is (v, <>, <>, v) and interval2 is (v, =, =, v)
+#     if interval1[1] == EQUAL_OP and interval2[1] == EQUAL_OP \
+#             and interval1[0] != interval2[0]:
+#         intersection = False
+#     elif interval1[1] == DIFFERENT_OP and interval2[1] == EQUAL_OP \
+#             and interval1[0] == interval2[0]:
+#         intersection = False
+#     # Check if interval1 is (v, =, =, v) and interval2 is (v, <>, <>, v)
+#     elif interval1[1] == EQUAL_OP and interval2[1] == DIFFERENT_OP \
+#             and interval1[0] == interval2[0]:
+#         intersection = False
+#     # Check if interval1 is (v, =, =, v)
+#     # and interval2 is (v1, < or <=, < or <=, v2)
+#     elif interval1[1] == EQUAL_OP \
+#             and interval2[1] in [LESS_OP, LESS_EQUAL_OP] \
+#             and not _is_inside_interval(interval1[0], interval2):
+#         intersection = False
+#     # Check if interval2 is (v, =, =, v)
+#     # and interval1 is (v1, < or <=, < or <=, v2)
+#     elif interval2[1] == EQUAL_OP \
+#             and interval1[1] in [LESS_OP, LESS_EQUAL_OP] \
+#             and not _is_inside_interval(interval2[0], interval1):
+#         intersection = False
+#     # Both intervals are (v1, < or <=, < or <=, v2)
+#     elif interval1[1] == LESS_OP \
+#             and interval2[2] in [LESS_OP, LESS_EQUAL_OP] \
+#             and _before_left(interval2[0], interval1):
+#         intersection = False
+#     elif interval1[2] == LESS_OP \
+#             and interval2[1] in [LESS_OP, LESS_EQUAL_OP] \
+#             and _after_right(interval2[0], interval1):
+#         intersection = False
+#     elif interval2[1] == LESS_OP \
+#             and interval1[2] in [LESS_OP, LESS_EQUAL_OP] \
+#             and _before_left(interval1[0], interval2):
+#         intersection = False
+#     elif interval2[2] == LESS_OP \
+#             and interval1[1] in [LESS_OP, LESS_EQUAL_OP] \
+#             and _after_right(interval1[0], interval2):
+#         intersection = False
+#     elif interval1[1] == LESS_EQUAL_OP and interval1[2] == LESS_EQUAL_OP \
+#             and interval2[1] == LESS_EQUAL_OP \
+#             and interval2[2] == LESS_EQUAL_OP \
+#             and not (_is_inside_interval(interval1[0], interval2)
+#                      or _is_inside_interval(interval1[3], interval2)):
+#         intersection = False
+
 def _interval_intersect(interval1, interval2):
     '''
     Check if there is interval intersection
     '''
-    intersection = True
-    # Check both intervals are (A, =, =, v)
-    if interval1[1] == EQUAL_OP and interval2[1] == EQUAL_OP \
-            and interval1[0] != interval2[0]:
-        intersection = False
-    # Check if interval1 is (A, <>, <>, v) and interval2 is (A, =, =, v)
-    elif interval1[1] == DIFFERENT_OP and interval2[1] == EQUAL_OP \
-            and interval1[0] == interval2[0]:
-        intersection = False
-    # Check if interval1 is (A, =, =, v) and interval2 is (A, <>, <>, v)
-    elif interval1[1] == EQUAL_OP and interval2[1] == DIFFERENT_OP \
-            and interval2[0] == interval1[0]:
-        intersection = False
-    # Check if interval1 is (A, =, =, v)
-    # and interval2 is (A, <, <=, None) or (A, <=, <=, None)
-    elif interval1[1] == EQUAL_OP \
-            and interval2[1] in [LESS_OP, LESS_EQUAL_OP] \
-            and not _is_inside_interval(interval1[0], interval2):
-        intersection = False
-    # Check if interval2 is (A, =, =, v)
-    # and interval1 is (A, <, <=, None) or (A, <=, <=, None)
-    elif interval2[1] == EQUAL_OP \
-            and interval1[1] in [LESS_OP, LESS_EQUAL_OP] \
-            and not _is_inside_interval(interval2[0], interval1):
-        intersection = False
-    # Both intervals are (A, <=, <=, None) or (A, <=, <=, None)
-    elif interval1[1] in [LESS_OP, LESS_EQUAL_OP] \
-            and interval2[1] in [LESS_OP, LESS_EQUAL_OP]:
-        # Sort intervals
-        if interval2[0] < interval1[0]:
-            interval1, interval2 = interval2, interval1
-        if not _is_inside_interval(interval1[3], interval2):
-            intersection = False
-    return intersection
+    # Check if intervals are the same
+    if interval1 == interval2:
+        return True
+    if interval1[1] == DIFFERENT_OP and interval2[1] != EQUAL_OP:
+        return True
+    if interval2[1] == DIFFERENT_OP and interval1[1] != EQUAL_OP:
+        return True
+    # Check if interval1 is (v, <>, <>, v) and interval2 is (v, =, =, v)
+    if interval1[1] == DIFFERENT_OP and interval2[1] == EQUAL_OP:
+        return not interval1[0] == interval2[0]
+    # Check if interval1 is (v, =, =, v) and interval2 is (v, <>, <>, v)
+    if interval2[1] == DIFFERENT_OP and interval1[1] == EQUAL_OP:
+        return not interval1[0] == interval2[0]
+    if EQUAL_OP in interval1[1] \
+            and _is_inside_interval(interval1[0], interval2):
+        return True
+    if EQUAL_OP in interval1[2] \
+            and _is_inside_interval(interval1[3], interval2):
+        return True
+    if EQUAL_OP in interval2[1] \
+            and _is_inside_interval(interval2[0], interval1):
+        return True
+    if EQUAL_OP in interval2[2] \
+            and _is_inside_interval(interval2[3], interval1):
+        return True
+    if _before(interval1[0], interval2[3]) \
+            and _after(interval1[3], interval2[0]):
+        return True
+    if _before(interval2[0], interval1[3]) \
+            and _after(interval2[3], interval1[0]):
+        return True
+    return False
+
+
+def _after(value1, value2):
+    if value1 == PLUS_INF:
+        return False
+    if value2 == PLUS_INF and value1 != PLUS_INF:
+        return True
+    return value1 > value2
+
+
+def _before(value1, value2):
+    if value1 == MINUS_INF:
+        return False
+    if value2 == MINUS_INF and value1 != MINUS_INF:
+        return True
+    return value1 < value2
 
 
 def _after_left(value, interval):
     '''
     Check if value is after left interval limit
     '''
-    if interval[0] is None \
-            or value is None \
+    if interval[0] != MINUS_INF \
+            and value == MINUS_INF:
+        return False
+    if interval[0] == MINUS_INF \
+            or value == PLUS_INF \
             or interval[0] < value \
             or (interval[0] <= value and
                 EQUAL_OP in interval[1]):
@@ -98,12 +171,68 @@ def _before_right(value, interval):
     '''
     Check if value is before right interval limit
     '''
-    if interval[3] is None \
+    if interval[3] != PLUS_INF \
+            and value == PLUS_INF:
+        return False
+    if interval[3] == PLUS_INF \
+            or value == MINUS_INF \
             or interval[3] > value \
             or (interval[3] >= value and
                 EQUAL_OP in interval[2]):
         return True
     return False
+
+
+def _strict_after_left(value, interval):
+    '''
+    Check if value is after left interval limit
+    '''
+    if interval[0] != MINUS_INF \
+            and value == MINUS_INF:
+        return False
+    if interval[0] == MINUS_INF \
+            or value == PLUS_INF \
+            or interval[0] < value:
+        return True
+    return False
+
+
+def _strict_before_right(value, interval):
+    '''
+    Check if value is before right interval limit
+    '''
+    if interval[3] != PLUS_INF \
+            and value == PLUS_INF:
+        return False
+    if interval[3] == PLUS_INF \
+            or value == MINUS_INF \
+            or interval[3] > value:
+        return True
+    return False
+
+
+# def _before_left(value, interval):
+#     '''
+#     Check if value is before left interval limit
+#     '''
+#     if value is not None \
+#             or value > interval[0] \
+#             or (value == interval[0] and
+#                 interval[1] == LESS_OP):
+#         return False
+#     return True
+#
+#
+# def _after_right(value, interval):
+#     '''
+#     Check if value is after right interval limit
+#     '''
+#     if value is not None \
+#             or value < interval[3] \
+#             or (value == interval[3] and
+#                 interval[2] == LESS_OP):
+#         return False
+#     return True
 
 
 def _is_inside_interval(value, interval):
@@ -113,6 +242,17 @@ def _is_inside_interval(value, interval):
     if interval[1] == DIFFERENT_OP and value != interval[0]:
         return True
     elif _after_left(value, interval) and _before_right(value, interval):
+        return True
+    return False
+
+
+def _is_strict_inside_interval(value, interval):
+    '''
+    Check if a value is inside an interval
+    '''
+    if interval[1] == DIFFERENT_OP and value != interval[0]:
+        return True
+    elif _strict_after_left(value, interval) and _strict_before_right(value, interval):
         return True
     return False
 
