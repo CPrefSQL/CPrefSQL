@@ -1,0 +1,11 @@
+(AA = 1.5) BETTER (AA = 2)
+AND
+(A = 5) BETTER (A <> 5)
+AND
+3 <= A < 5 BETTER A >= 6
+AND
+B = 'one' BETTER B = 'two' [C, D]
+AND
+IF E = 'three' THEN B = 'two' BETTER B = 'three'
+AND
+IF E = 'four' AND (F = 'five') THEN B = 'three' BETTER B = 'two' (D,G)
