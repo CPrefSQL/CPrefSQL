@@ -1,0 +1,3 @@
+(Itinerary='cruise') > (Itinerary='beach') [Destination, Duration] AND
+(Itinerary='beach') > (Itinerary='urban') [Price, Destination] AND
+IF (Itinerary='cruise') THEN (Price < 2500) > (Price >= 2500) [Destination, Duration]
