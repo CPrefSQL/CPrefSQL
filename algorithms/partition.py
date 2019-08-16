@@ -30,11 +30,11 @@ def partition(record_list, comparison):
     list_dominants = []
     list_non_dominants = []
     for part in partition_table:
-        part = partition_table[part]
+        part_list = partition_table[part]
         part_dominant = []
         part_non_dominant = []
         part_indifferent = []
-        for rec in part:
+        for rec in part_list:
             if comparison.is_best_record(rec):
                 part_dominant.append(rec)
             elif comparison.is_worst_record(rec):
@@ -42,10 +42,10 @@ def partition(record_list, comparison):
             else:
                 part_indifferent.append(rec)
         if part_dominant:
-            list_dominants = list_dominants+part
+            list_dominants += part_dominant+part_indifferent
+            list_non_dominants += part_non_dominant
         else:
-            list_dominants = list_dominants+part_dominant+part_indifferent
-            list_non_dominants = list_non_dominants+part_non_dominant
+            list_dominants += part_list
     return list_dominants, list_non_dominants
 
 

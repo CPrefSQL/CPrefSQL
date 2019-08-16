@@ -11,5 +11,6 @@ encoding//preference/comparison.py=utf-8
 encoding//preference/graph.py=utf-8
 encoding//preference/interval.py=utf-8
 encoding//preference/rule.py=utf-8
+encoding//preference/test_interval.py=utf-8
 encoding//preference/test_theory.py=utf-8
 encoding//preference/theory.py=utf-8
