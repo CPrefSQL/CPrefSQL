@@ -96,7 +96,7 @@ class CPTheory(object):
                 return False
         return True
 
-    def _build_formulas(self):
+    def build_formulas(self):
         '''
         Generate a list of formulas combining all intervals of attributes
         '''
@@ -150,8 +150,7 @@ class CPTheory(object):
         '''
         Generate comparisons
         '''
-        # Build formulas
-        self._build_formulas()
+        
         # Generate direct comparisons
         comp_dict = {}
         for idx1, formula1 in enumerate(self._formula_list):
