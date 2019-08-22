@@ -1,0 +1,5 @@
+(brand = 'Apple') BETTER (brand = 'Samsung')[screen,model,ram,storage,price]
+AND
+(brand = 'Samsung') BETTER (brand='Motorola') [screen,model, ram, storage, price]
+AND
+IF (brand = 'Samsung')  THEN (ram <6) > (ram>=6) [screen,model,storage,price]
