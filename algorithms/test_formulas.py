@@ -15,7 +15,7 @@ sys.path.append(os.path.realpath(os.path.join(PATH, '..')))
 
 if __name__ == '__main__':
     from algorithms.formulas_method import get_formulas_best, get_formulas_topk
-    
+
     if len(sys.argv) != 4:
         exit(0)
     PREF_FILE = open(sys.argv[1])
@@ -33,34 +33,9 @@ if __name__ == '__main__':
     for rec in CURSOR.fetchall():
         REC_LIST.append(dict(rec))
         print dict(rec)
-        
+
     print '\n\nBest records:'
-    #BEST_LIST = get_formulas_topk(PREF_TEXT, REC_LIST,4)
+    # BEST_LIST = get_formulas_topk(PREF_TEXT, REC_LIST,4)
     BEST_LIST = get_formulas_best(PREF_TEXT, REC_LIST)
     for rec in BEST_LIST:
         print rec
-                
-            
-            
-        
-            
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
