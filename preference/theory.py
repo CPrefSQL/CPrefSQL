@@ -9,6 +9,7 @@ from preference.comparison import build_comparison, Comparison
 from preference.interval import intersect
 from preference.rule import CPRule
 from grammar.theory_grammar import TheoryGrammar
+from preference.btg_graph import BTG_Graph
 
 
 # TODO: implement debug log
@@ -150,7 +151,7 @@ class CPTheory(object):
         '''
         Generate comparisons
         '''
-        
+
         # Generate direct comparisons
         comp_dict = {}
         for idx1, formula1 in enumerate(self._formula_list):
@@ -276,6 +277,35 @@ class CPTheory(object):
                     str_btg += "\nt" + str(index1 + 1) + \
                             " -> t" + str(index2 + 1)
         return str_btg
+
+    def build_btg(self, formulas):
+        graph = BTG_Graph()
+
+        # build BTG graph with the formulas
+        for index1, formula1 in enumerate(formulas):
+            for index2, formula2 in enumerate(formulas):
+                for rule in self._rule_list:
+                    if rule.dominates(formula1, formula2):
+                        graph.add_edge(index1, index2)
+
+        return graph
+
+    def get_max_formulas(self):
+        '''
+        Extract the max formulas from the lists
+        '''
+
+        formula_length = 0
+        for formula in self._formula_list:
+            if len(formula) > formula_length:
+                formula_length = len(formula)
+
+        max_formulas = []
+        for formula in self._formula_list:
+            if len(formula) == formula_length:
+                max_formulas.append(formula)
+
+        return max_formulas
 
 
 def _build_interval_graph(rule_list):

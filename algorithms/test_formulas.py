@@ -35,7 +35,7 @@ if __name__ == '__main__':
         print dict(rec)
 
     print '\n\nBest records:'
-    # BEST_LIST = get_formulas_topk(PREF_TEXT, REC_LIST,4)
+    # BEST_LIST = get_formulas_topk(PREF_TEXT, REC_LIST, 4)
     BEST_LIST = get_formulas_best(PREF_TEXT, REC_LIST)
     for rec in BEST_LIST:
         print rec

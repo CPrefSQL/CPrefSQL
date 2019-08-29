@@ -5,6 +5,8 @@ Module to build preference graphs
 This graphs are used in theory consistency tests
 '''
 
+import copy
+
 
 class BTG_Graph(object):
     '''
@@ -67,3 +69,23 @@ class BTG_Graph(object):
                     nodes.remove(node)
 
         return nodes
+
+    def graph_to_preference_list(self):
+
+        # make a copy of the graph
+        graph = copy.deepcopy(self)
+
+        preference_list = []
+        top_nodes = graph.get_top_vertex()
+
+        while len(top_nodes) > 0:
+            preference_list.append(top_nodes)
+
+            # remove edges from graph
+            for node in top_nodes:
+                graph._graph_dict.pop(node)
+
+            # get next level of nodes
+            top_nodes = graph.get_top_vertex()
+
+        return preference_list
