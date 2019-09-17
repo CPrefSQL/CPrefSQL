@@ -8,22 +8,18 @@ from preference.theory import build_cptheory
 from preference.comparison import _is_record_valid_by_formula
 
 
-def get_formulas_best(preference_text, record_list):
+def get_hifor_best(preference_text, record_list):
     '''
     Get best records according to CPTheory (formulas algorithm)
 
     A record is best if it is not dominated by any other record
     '''
 
+    # build theory from preference text
     theory = build_cptheory(preference_text)
-    theory.build_formulas()
-    max_formulas = theory.get_max_formulas()
 
-    # build BTG graph with the formulas
-    graph = theory.build_btg(max_formulas)
-
-    # return the topological ordering of the graph
-    preference_list = graph.graph_to_preference_list()
+    # get preference list and max formulas
+    preference_list, max_formulas = theory.get_preference_list()
 
     # search for the records with the lowest level
     t = []
@@ -51,22 +47,18 @@ def get_formulas_best(preference_text, record_list):
     return t
 
 
-def get_formulas_topk(preference_text,  record_list, k):
+def get_hifor_topk(preference_text,  record_list, k):
     '''
     Get k best records according to CPTheory (formulas algorithm)
 
     A record is best if it is not dominated by any other record
     '''
 
+    # build theory from preference text
     theory = build_cptheory(preference_text)
-    theory.build_formulas()
 
-    max_formulas = theory.get_max_formulas()
-    # build BTG graph with the formulas
-    graph = theory.build_btg(max_formulas)
-
-    # return the topological ordering of the graph
-    preference_list = graph.graph_to_preference_list()
+    # get preference list and max formulas
+    preference_list, max_formulas = theory.get_preference_list()
 
     # search for the records with the lowest level
     t = []

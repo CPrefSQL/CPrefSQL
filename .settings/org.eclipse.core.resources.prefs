@@ -1,8 +1,8 @@
 eclipse.preferences.version=1
-encoding//algorithms/formulas_method.py=utf-8
+encoding//algorithms/hifor.py=utf-8
 encoding//algorithms/nested_loops.py=utf-8
 encoding//algorithms/partition.py=utf-8
-encoding//algorithms/test_formulas.py=utf-8
+encoding//algorithms/test_hifor.py=utf-8
 encoding//algorithms/test_nested_loops.py=utf-8
 encoding//algorithms/test_partition.py=utf-8
 encoding//grammar/basic.py=utf-8

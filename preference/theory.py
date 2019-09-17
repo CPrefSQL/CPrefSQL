@@ -307,6 +307,25 @@ class CPTheory(object):
 
         return max_formulas
 
+    def get_preference_list(self):
+        '''
+        Use formulas to build graph and return
+
+        the preference list
+        '''
+
+        self.build_formulas()
+
+        max_formulas = self.get_max_formulas()
+
+        # build BTG graph with the formulas
+        graph = self.build_btg(max_formulas)
+
+        # return the topological ordering of the graph
+        preference_list = graph.graph_to_preference_list()
+
+        return preference_list, max_formulas
+
 
 def _build_interval_graph(rule_list):
     '''
