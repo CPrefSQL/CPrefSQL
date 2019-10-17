@@ -20,8 +20,8 @@ def get_maxpref_best(preference_text, record_list):
     theory = build_cptheory(preference_text)
 
     # Get maximal formulas and sorted formula list
-    max_formulas = theory.get_max_formulas()
     sorted_list = theory.get_sorted_formulas()
+    max_formulas = theory.get_max_formulas()
 
     # List of records to be returned
     result_list = []
@@ -61,15 +61,15 @@ def get_maxpref_best(preference_text, record_list):
     return result_list
 
 
-def get_hifor_topk(preference_text,  record_list, k):
+def get_maxpref_topk(preference_text,  record_list, k):
     '''
     Get top-k (maximal) records according to CPTheory (MaxPref semantic)
     '''
     # Build theory from preference text
     theory = build_cptheory(preference_text)
     # Get maximal formulas and sorted formula list
-    max_formulas = theory.get_max_formulas()
     sorted_list = theory.get_sorted_formulas()
+    max_formulas = theory.get_max_formulas()
     # List of records to be returned
     result_list = []
 

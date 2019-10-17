@@ -14,7 +14,7 @@ sys.path.append(os.path.realpath(os.path.join(PATH, '..')))
 
 
 if __name__ == '__main__':
-    from algorithms.nested_loops import get_best
+    from algorithms.nested_loops import get_best, get_topk
     if len(sys.argv) != 4:
         exit(0)
     PREF_FILE = open(sys.argv[1])
@@ -34,5 +34,10 @@ if __name__ == '__main__':
         print dict(rec)
     print '\n\nBest records:'
     BEST_LIST = get_best(PREF_TEXT, REC_LIST)
+    for rec in BEST_LIST:
+        print rec
+
+    print '\n\nTop-2 records:'
+    BEST_LIST = get_topk(PREF_TEXT, REC_LIST, 2)
     for rec in BEST_LIST:
         print rec

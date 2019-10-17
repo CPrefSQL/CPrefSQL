@@ -14,9 +14,7 @@ sys.path.append(os.path.realpath(os.path.join(PATH, '..')))
 
 
 if __name__ == '__main__':
-    from algorithms.partition import get_best_partition
-    # from algorithms.partition import get_topk_partition
-    # from preference.theory import build_cptheory
+    from algorithms.partition import get_best_partition, get_topk_partition
 
     if len(sys.argv) != 4:
         exit(0)
@@ -37,7 +35,11 @@ if __name__ == '__main__':
         print dict(rec)
 
     print '\n\nBest records:'
-    # BEST_LIST = get_topk_partition(PREF_TEXT, REC_LIST, 5)
     BEST_LIST = get_best_partition(PREF_TEXT, REC_LIST)
+    for rec in BEST_LIST:
+        print rec
+
+    print '\n\nTop-2 records:'
+    BEST_LIST = get_topk_partition(PREF_TEXT, REC_LIST, 2)
     for rec in BEST_LIST:
         print rec
