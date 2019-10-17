@@ -1,10 +1,10 @@
 DROP TABLE IF EXISTS travels;
 
 CREATE TABLE travels (
-  destination  TEXT,
-  price  INTEGER,
-  duration  INTEGER,
-  itinerary  TEXT
+  destination TEXT,
+  price       INTEGER,
+  duration    INTEGER,
+  itinerary   TEXT
 );
 
 INSERT INTO travels VALUES
