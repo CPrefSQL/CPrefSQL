@@ -63,38 +63,30 @@ def get_maxpref_best(preference_text, record_list):
 
 def get_hifor_topk(preference_text,  record_list, k):
     '''
-    Get best (maximal) records according to CPTheory (MaxPref semantic)
-
-    A record is maximal if it is satisfies a formula F and do not exist
-    other record satisfied by formulas better than F
+    Get top-k (maximal) records according to CPTheory (MaxPref semantic)
     '''
-
-    # build theory from preference text
+    # Build theory from preference text
     theory = build_cptheory(preference_text)
+    # Get maximal formulas and sorted formula list
+    max_formulas = theory.get_max_formulas()
+    sorted_list = theory.get_sorted_formulas()
+    # List of records to be returned
+    result_list = []
 
-    # get preference list and max formulas
-    preference_list, max_formulas = theory.get_sorted_formulas()
-
-    # search for the records with the lowest level
-    t = []
-
-    for formula_list in preference_list:
-        for index in formula_list:
-
-            for rec in record_list:
-                # if find lower level, discard old records and reset best level
-                if _is_record_valid_by_formula(max_formulas[index], rec):
-                    t.append(rec)
-
-                    if len(t) >= k:
-                        return t
-
-    # less than k records were found, add more
-    if len(t) < k:
-        for rec in record_list:
-            if rec not in t:
-                t.append(rec)
-                if len(t) >= k:
-                    break
-
-    return t
+    # For each input record
+    for rec in record_list: 
+        # For each sub_list of sorted formulas
+        for formula_level, formula_list in enumerate(sorted_list):
+            # For each formula in current formula level
+            for formula_id in formula_list:
+                # If record is satisfied by current formula
+                if _is_record_valid_by_formula(max_formulas[formula_id], rec):
+                    # Label the record with formula level
+                    rec_level = (formula_level, rec)
+                    # Append to result list
+                    result_list.append(rec_level)
+    # Sort records according to formula level
+    result_list.sort()
+    # Remove formula level
+    result_list = [tup[1] for tup in result_list]
+    return result_list[:k]

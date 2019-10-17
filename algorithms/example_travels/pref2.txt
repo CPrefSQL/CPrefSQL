@@ -1,5 +1,0 @@
-(function = 'midfield') BETTER (function = 'attack')[name, goals]
-AND
-(function = 'attack') BETTER (function = 'defense')[name,goals]
-AND
-IF (function = 'attack') THEN (league='spanish') BETTER (league='brazilian')[nome,goals]
