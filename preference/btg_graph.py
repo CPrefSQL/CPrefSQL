@@ -72,11 +72,9 @@ class BTG_Graph(object):
 
         return nodes
 
-    def graph_to_preference_list(self):
+    def get_topological_list(self):
         '''
         Uses topological sorting to transform graph into a node list
-
-        following defined level of preference
         '''
 
         preference_list = []

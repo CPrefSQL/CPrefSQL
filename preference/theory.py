@@ -13,6 +13,7 @@ from preference.btg_graph import BTG_Graph
 
 
 # TODO: implement debug log
+# TODO: Check private and public methods
 class CPTheory(object):
     '''
     Class to represent a conditional preference theory
@@ -22,6 +23,8 @@ class CPTheory(object):
         self._rule_list = rule_list
         # List of formulas (used by partition method)
         self._formula_list = []
+        # List of maximal formulas (used by maxpref method)
+        self._max_formula_list = []
         # List of comparisons (used by partition method)
         self._comparison_list = []
 
@@ -290,7 +293,7 @@ class CPTheory(object):
 
         return graph
 
-    def get_max_formulas(self):
+    def _build_max_formulas(self):
         '''
         Extract the max formulas from the lists
         '''
@@ -304,27 +307,29 @@ class CPTheory(object):
         for formula in self._formula_list:
             if len(formula) == formula_length:
                 max_formulas.append(formula)
+        self._max_formula_list = max_formulas
 
-        return max_formulas
-
-    def get_preference_list(self):
+    def get_max_formulas(self):
         '''
-        Use formulas to build graph and return
-
-        the preference list
+        Return the list of maximal formulas
         '''
+        return self._max_formula_list
 
+
+    def get_sorted_formulas(self):
+        '''
+        Use formulas to build graph and return the preference list
+        '''
+        # Build formulas
         self.build_formulas()
+        # Get maximal formulas
+        self._build_max_formulas()
+        # Build BTG graph with the formulas
+        graph = self.build_btg(self.get_max_formulas())
+        # Return the topological ordering of the graph
+        sorted_list = graph.get_topological_list()
 
-        max_formulas = self.get_max_formulas()
-
-        # build BTG graph with the formulas
-        graph = self.build_btg(max_formulas)
-
-        # return the topological ordering of the graph
-        preference_list = graph.graph_to_preference_list()
-
-        return preference_list, max_formulas
+        return sorted_list
 
 
 def _build_interval_graph(rule_list):

@@ -14,7 +14,7 @@ sys.path.append(os.path.realpath(os.path.join(PATH, '..')))
 
 
 if __name__ == '__main__':
-    from algorithms.hifor import get_hifor_best, get_hifor_topk
+    from algorithms.maxpref import get_maxpref_best, get_hifor_topk
 
     if len(sys.argv) != 4:
         exit(0)
@@ -36,6 +36,6 @@ if __name__ == '__main__':
 
     print '\n\nBest records:'
     # BEST_LIST = get_hifor_topk(PREF_TEXT, REC_LIST, 4)
-    BEST_LIST = get_hifor_best(PREF_TEXT, REC_LIST)
+    BEST_LIST = get_maxpref_best(PREF_TEXT, REC_LIST)
     for rec in BEST_LIST:
         print rec
