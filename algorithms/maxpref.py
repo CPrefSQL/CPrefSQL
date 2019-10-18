@@ -6,14 +6,15 @@ Module with new algorithms
 
 from preference.theory import build_cptheory
 from preference.comparison import _is_record_valid_by_formula
+import copy
 
 
 def get_maxpref_best(preference_text, record_list):
     '''
     Get best (maximal) records according to CPTheory (MaxPref semantic)
 
-    A record is maximal if it is satisfies a formula F and do not exist
-    other record satisfied by formulas better than F
+    A record is maximal if it is satisfies a formula F and there is
+    no other record that satisfies a formula better than F
     '''
 
     # Build theory from preference text
@@ -25,13 +26,16 @@ def get_maxpref_best(preference_text, record_list):
 
     # List of records to be returned
     result_list = []
-    # Current formula level (anyone is smaller then infinity)
+    # Current formula level (anyone is smaller then plus infinity)
     current_level = float("Inf")
 
+    # copy record lists because algorithm needs to modify the list
+    records = copy.deepcopy(record_list)
+
     # For each input record
-    for rec in record_list:
+    for rec in records:
         # Suppose no level changes
-        level_change = False 
+        level_change = False
         # For each sub_list of sorted formulas
         for formula_level, formula_list in enumerate(sorted_list):
             # For each formula in current formula level
@@ -57,7 +61,7 @@ def get_maxpref_best(preference_text, record_list):
             sorted_list = sorted_list[:current_level+1]
     # If no one record match with the formulas, we return all input records
     if len(result_list) == 0:
-        return record_list
+        return records
     return result_list
 
 
@@ -73,8 +77,13 @@ def get_maxpref_topk(preference_text,  record_list, k):
     # List of records to be returned
     result_list = []
 
+    # copy record lists because algorithm needs to modify it
+    records = copy.deepcopy(record_list)
+
+    # TODO: scanning formula the list might be faster,
+    # because no sorting is required
     # For each input record
-    for rec in record_list: 
+    for rec in records:
         # For each sub_list of sorted formulas
         for formula_level, formula_list in enumerate(sorted_list):
             # For each formula in current formula level

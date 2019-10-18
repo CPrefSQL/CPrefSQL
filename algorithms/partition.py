@@ -15,22 +15,40 @@ def get_best_partition(preference_text, record_list):
     theory = build_cptheory(preference_text)
     # Build formulas
     theory.build_formulas()
+    # Build comparisons from formulas
     theory.build_comparisons()
+    # Apply partition algorithm
     result = partition_best(theory, record_list)
     return result
 
 
 def partition_best(theory, record_list):
+    '''
+    Get best records by partitioning the record list
+    based on each comparison and separating the dominant
+    records and discarding the dominated ones
+    '''
+
     dominants = list(record_list)
+    # for each comparison, verify dominant records
     for comp in theory.get_comparison_list():
         dominants, _ = partition(dominants, comp)
     return dominants
 
 
 def partition(record_list, comparison):
+    '''
+    Uses comparison to build partitions by the record's attribute values
+    and scans the the content of the partitions to separate the records
+    by the comparison formulas
+    '''
+
+    # create partitions based on attributes that will be ignored
     partition_table = create_partitions(record_list, comparison)
-    list_dominants = []
-    list_non_dominants = []
+    dominant_list = []
+    non_dominants_list = []
+
+    # for each partition, separated the dominant records
     for part in partition_table:
         part_list = partition_table[part]
         part_dominant = []
@@ -44,14 +62,19 @@ def partition(record_list, comparison):
             else:
                 part_indifferent.append(rec)
         if part_dominant:
-            list_dominants += part_dominant+part_indifferent
-            list_non_dominants += part_non_dominant
+            dominant_list += part_dominant+part_indifferent
+            non_dominants_list += part_non_dominant
         else:
-            list_dominants += part_list
-    return list_dominants, list_non_dominants
+            dominant_list += part_list
+    return dominant_list, non_dominants_list
 
 
 def get_partition_id(tup, attribute_set):
+    '''
+    Convert record attribute values into a hasheable tuple
+    that can be used as a partition index
+    for the hash table that represents the partitions
+    '''
     att_list = []
     for att in attribute_set:
         att_list.append(tup[att])
@@ -59,6 +82,11 @@ def get_partition_id(tup, attribute_set):
 
 
 def create_partitions(tuple_list, comparison):
+    '''
+    Build hash table from comparison and tuples
+    Tuples are grouped by "cetera paribus", so non-indifferent
+    attributes must be the same
+    '''
     hash_table = {}
     attribute_set = set(tuple_list[0].keys())
     # ignore indifferent attributes
@@ -83,25 +111,29 @@ def get_topk_partition(preference_text, record_list, k):
     theory = build_cptheory(preference_text)
     # Build formulas
     theory.build_formulas()
+    # Build comparisons
     theory.build_comparisons()
+    # Apply algorithm
     result = partition_topk(theory, record_list, k)
     return result
 
 
 def partition_topk(theory, record_list, k):
-    dominant_recs = list(record_list)
+    '''
+    Separate the top-k most dominant tuples
+    The algorithm repeatedly scans the set of dominated tuples
+    progressively populating the return list
+    '''
+    # initially assumes all dominant
+    dominated_list = list(record_list)
     return_list = []
 
-    while len(return_list) < k and dominant_recs:
+    # repeatedly scan the dominated list
+    while len(return_list) < k and dominated_list:
         temporary_list = []
         for comp in theory.get_comparison_list():
-            dominant_recs, non_dominant_recs = partition(dominant_recs, comp)
+            dominant_recs, non_dominant_recs = partition(dominated_list, comp)
             temporary_list = temporary_list+non_dominant_recs
         return_list = return_list + dominant_recs
-        dominant_recs = temporary_list
+        dominated_list = temporary_list
     return return_list[0:k]
-
-
-
-
-

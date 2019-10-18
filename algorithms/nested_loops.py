@@ -4,6 +4,7 @@
 Module with nested loop algorithms
 '''
 from preference.theory import build_cptheory
+import copy
 
 
 def get_best_and_worst(theory, record_list):
@@ -59,8 +60,11 @@ def get_best(preference_text, record_list):
 
     A record is best if it is not dominated by any other record
     '''
+    # build theory
     theory = build_cptheory(preference_text)
-    result, _ = get_best_and_worst(theory, record_list)
+    # copy list, it will be modified
+    records = copy.deepcopy(record_list)
+    result, _ = get_best_and_worst(theory, records)
     return result
 
 
@@ -68,8 +72,10 @@ def get_topk(preference_text, record_list, k):
     '''
     Returns the top-k records with lowest level according to a cp-theory
     '''
+    # build theory
     theory = build_cptheory(preference_text)
-    worst_list = record_list
+    # copy list, it will be modified
+    worst_list = copy.deepcopy(record_list)
     topk_list = []
     while len(topk_list) < k and worst_list:
         best_list, worst_list = get_best_and_worst(theory, worst_list)

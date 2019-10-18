@@ -4,12 +4,11 @@
 Module to manipulate conditional preference theories (cp-theories)
 '''
 
-from preference.graph import PreferenceGraph
 from preference.comparison import build_comparison, Comparison
 from preference.interval import intersect
 from preference.rule import CPRule
 from grammar.theory_grammar import TheoryGrammar
-from preference.btg_graph import BTG_Graph
+from preference.graph import Graph
 
 
 # TODO: implement debug log
@@ -38,10 +37,12 @@ class CPTheory(object):
     def __repr__(self):
         return self.__str__()
 
-    def is_consistency(self):
+    def is_consistent(self):
         '''
         Check theory consistency
         '''
+
+        # check first global consistency and then local consistency
         if self._is_global_consistent() \
                 and self._is_local_consistent():
             return True
@@ -59,7 +60,7 @@ class CPTheory(object):
         If builded graph is acyclic, then theory is globally consistent
         '''
         # Initialize graph
-        graph = PreferenceGraph()
+        graph = Graph()
         # For each rule
         for rule in self._rule_list:
             # For each condition in rule
@@ -82,6 +83,7 @@ class CPTheory(object):
         '''
         rules_list = []
         for rule in self._rule_list:
+            # separate rules on the same attribute
             if rule.get_preference_attribute() == attribute:
                 rules_list.append(rule)
         return rules_list
@@ -93,9 +95,13 @@ class CPTheory(object):
         A theory is local inconsistent if there are a set of compatible rules
         such that an interval is preferred than itself
         '''
+        # build sets of compatible rules
         for rule_set in self._get_compatible_sets():
+            # build graph with rule sets
             rule_list = [self._rule_list[index] for index in rule_set]
             graph = _build_interval_graph(rule_list)
+
+            # verify that there are no cycles on the graph created
             if not graph.is_acyclic():
                 return False
         return True
@@ -152,7 +158,7 @@ class CPTheory(object):
 
     def build_comparisons(self):
         '''
-        Generate comparisons
+        Generate comparisons from formulas
         '''
 
         # Generate direct comparisons
@@ -281,8 +287,11 @@ class CPTheory(object):
                             " -> t" + str(index2 + 1)
         return str_btg
 
-    def build_btg(self, formulas):
-        graph = BTG_Graph()
+    def build_hfg(self, formulas):
+        '''
+        Build HFG graph from max formulas
+        '''
+        graph = Graph()
 
         # build BTG graph with the formulas
         for index1, formula1 in enumerate(formulas):
@@ -298,15 +307,19 @@ class CPTheory(object):
         Extract the max formulas from the lists
         '''
 
+        # get the maximum formula size
         formula_length = 0
         for formula in self._formula_list:
             if len(formula) > formula_length:
                 formula_length = len(formula)
 
+        # search and separate formulas with that size
         max_formulas = []
         for formula in self._formula_list:
             if len(formula) == formula_length:
                 max_formulas.append(formula)
+
+        # replace formulas, with only max formulas
         self._max_formula_list = max_formulas
 
     def get_max_formulas(self):
@@ -315,17 +328,17 @@ class CPTheory(object):
         '''
         return self._max_formula_list
 
-
     def get_sorted_formulas(self):
         '''
         Use formulas to build graph and return the preference list
+        by topological sorting of the graph
         '''
         # Build formulas
         self.build_formulas()
         # Get maximal formulas
         self._build_max_formulas()
         # Build BTG graph with the formulas
-        graph = self.build_btg(self.get_max_formulas())
+        graph = self.build_hfg(self.get_max_formulas())
         # Return the topological ordering of the graph
         sorted_list = graph.get_topological_list()
 
@@ -339,7 +352,7 @@ def _build_interval_graph(rule_list):
     (P) is the preferred interval and (NP) is the non preferred interval
     of each rule
     '''
-    graph = PreferenceGraph()
+    graph = Graph()
     for rule in rule_list:
         pref = rule.get_preference()
         graph.add_edge(pref.get_best_interval(),

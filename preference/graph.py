@@ -7,7 +7,7 @@ This graphs are used in theory consistency tests
 from preference.interval import intersect
 
 
-class PreferenceGraph(object):
+class Graph(object):
     '''
     Preference Graph
 
@@ -40,12 +40,16 @@ class PreferenceGraph(object):
 
         If vertices don't exist, they will be created
         '''
-        if from_vertex not in self._graph_dict:
-            self._graph_dict[from_vertex] = []
-        if to_vertex not in self._graph_dict:
-            self._graph_dict[to_vertex] = []
-        if to_vertex not in self._graph_dict[from_vertex]:
-            self._graph_dict[from_vertex].append(to_vertex)
+        if to_vertex is not None:
+            if from_vertex not in self._graph_dict:
+                self._graph_dict[from_vertex] = []
+            if to_vertex not in self._graph_dict:
+                self._graph_dict[to_vertex] = []
+            if to_vertex not in self._graph_dict[from_vertex]:
+                self._graph_dict[from_vertex].append(to_vertex)
+        else:
+            if from_vertex not in self._graph_dict:
+                self._graph_dict[from_vertex] = []
 
     def depth_first_search(self, start_vertex, goal_vertex):
         '''
@@ -101,3 +105,48 @@ class PreferenceGraph(object):
                         new_list.append(ve3)
             # Create edges from ve1 to vertices in new list
             self._graph_dict[ve1] += new_list
+
+    def get_top_vertex(self):
+        '''
+        Get the highest nodes of the graph
+        return nodes that don't receive any edges
+        '''
+
+        nodes = set()
+
+        # scan nodes in the graph
+        for index_node in self._graph_dict:
+            nodes.add(index_node)
+
+        # choose nodes with aren't destinations
+        for index_node in self._graph_dict:
+            for node in self._graph_dict[index_node]:
+                if node in nodes:
+                    nodes.remove(node)
+
+        return nodes
+
+    def get_topological_list(self):
+        '''
+        Uses topological sorting to transform graph into a node list
+        where each position of the list is populated with formulas of the same
+        preference level
+        '''
+
+        preference_list = []
+
+        # get first nodes
+        top_nodes = self.get_top_vertex()
+
+        while len(top_nodes) > 0:
+            # append nodes to the list
+            preference_list.append(top_nodes)
+
+            # remove edges from graph for given nodes
+            for node in top_nodes:
+                self._graph_dict.pop(node)
+
+            # get next level of nodes
+            top_nodes = self.get_top_vertex()
+
+        return preference_list

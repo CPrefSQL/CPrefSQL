@@ -126,7 +126,7 @@ def _after(value1, value2):
 
 def _before(value1, value2):
     '''
-    Check if value1 is before value 2
+    Check if value1 appears before value 2
     '''
     # Check if value1 is -infinite (nothing can be before -infinite)
     if value1 == MINUS_INF:
@@ -138,7 +138,7 @@ def _before(value1, value2):
 
 def _after_left(value, interval):
     '''
-    Check if value is after left interval limit
+    Check if value appears after left interval limit
     '''
     # Check if left limit is no -infinite and value is -infinite
     if interval[0] != MINUS_INF \
@@ -157,7 +157,7 @@ def _after_left(value, interval):
 
 def _before_right(value, interval):
     '''
-    Check if value is before right interval limit
+    Check if value appears before right interval limit
     '''
     # Check if right limit is no +infinite and value is +infinite
     if interval[3] != PLUS_INF \
