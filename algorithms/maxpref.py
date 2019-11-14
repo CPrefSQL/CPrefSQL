@@ -6,7 +6,6 @@ Module with new algorithms
 
 from preference.theory import build_cptheory
 from preference.comparison import _is_record_valid_by_formula
-import copy
 
 
 def get_maxpref_best(preference_text, record_list):
@@ -15,6 +14,8 @@ def get_maxpref_best(preference_text, record_list):
 
     A record is maximal if it is satisfies a formula F and there is
     no other record that satisfies a formula better than F
+
+    It does modify the record list as it processes it
     '''
 
     # Build theory from preference text
@@ -22,6 +23,7 @@ def get_maxpref_best(preference_text, record_list):
 
     # Get maximal formulas and sorted formula list
     sorted_list = theory.get_sorted_formulas()
+    print sorted_list
     max_formulas = theory.get_max_formulas()
 
     # List of records to be returned
@@ -29,11 +31,8 @@ def get_maxpref_best(preference_text, record_list):
     # Current formula level (anyone is smaller then plus infinity)
     current_level = float("Inf")
 
-    # copy record lists because algorithm needs to modify the list
-    records = copy.deepcopy(record_list)
-
     # For each input record
-    for rec in records:
+    for rec in record_list:
         # Suppose no level changes
         level_change = False
         # For each sub_list of sorted formulas
@@ -61,7 +60,7 @@ def get_maxpref_best(preference_text, record_list):
             sorted_list = sorted_list[:current_level+1]
     # If no one record match with the formulas, we return all input records
     if len(result_list) == 0:
-        return records
+        return record_list
     return result_list
 
 
@@ -77,13 +76,9 @@ def get_maxpref_topk(preference_text,  record_list, k):
     # List of records to be returned
     result_list = []
 
-    # copy record lists because algorithm needs to modify it
-    records = copy.deepcopy(record_list)
-
-    # TODO: scanning formula the list might be faster,
     # because no sorting is required
     # For each input record
-    for rec in records:
+    for rec in record_list:
         # For each sub_list of sorted formulas
         for formula_level, formula_list in enumerate(sorted_list):
             # For each formula in current formula level

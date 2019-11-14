@@ -39,6 +39,13 @@ if __name__ == '__main__':
     for rec in BEST_LIST:
         print rec
 
+    REC_LIST = []
+    CURSOR.execute('SELECT * FROM ' + DATA_TABLE + ';')
+    print '\n\nInput records:'
+    for rec in CURSOR.fetchall():
+        REC_LIST.append(dict(rec))
+        print dict(rec)
+
     print '\n\nTop-2 records:'
     BEST_LIST = get_maxpref_topk(PREF_TEXT, REC_LIST, 2)
     for rec in BEST_LIST:
