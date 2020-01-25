@@ -23,30 +23,30 @@ if __name__ == '__main__':
     DATA_FILE = sys.argv[2]
     DATA_TABLE = sys.argv[3]
     REC_LIST = []
-    print '\n\nPreferences:'
-    print PREF_TEXT
+    print('\n\nPreferences:')
+    print(PREF_TEXT)
     CON = sqlite3.connect(DATA_FILE)
     CON.row_factory = sqlite3.Row
     CURSOR = CON.cursor()
     CURSOR.execute('SELECT * FROM ' + DATA_TABLE + ';')
-    print '\n\nInput records:'
+    print('\n\nInput records:')
     for rec in CURSOR.fetchall():
         REC_LIST.append(dict(rec))
-        print dict(rec)
+        print(dict(rec))
 
-    print '\n\nBest records:'
+    print('\n\nBest records:')
     BEST_LIST = get_best_partition(PREF_TEXT, REC_LIST)
     for rec in BEST_LIST:
-        print rec
+        print(rec)
 
     REC_LIST = []
     CURSOR.execute('SELECT * FROM ' + DATA_TABLE + ';')
-    print '\n\nInput records:'
+    print('\n\nInput records:')
     for rec in CURSOR.fetchall():
         REC_LIST.append(dict(rec))
-        print dict(rec)
+        print(dict(rec))
 
-    print '\n\nTop-2 records:'
+    print('\n\nTop-2 records:')
     BEST_LIST = get_topk_partition(PREF_TEXT, REC_LIST, 2)
     for rec in BEST_LIST:
-        print rec
+        print(rec)

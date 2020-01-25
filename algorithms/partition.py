@@ -125,15 +125,14 @@ def partition_topk(theory, record_list, k):
     progressively populating the return list
     '''
     # initially assumes all dominant
-    dominated_list = list(record_list)
     return_list = []
-
-    # repeatedly scan the dominated list
-    while len(return_list) < k and dominated_list:
+    dominant_recs = list(record_list)
+    while len(return_list) < k and dominant_recs:
         temporary_list = []
+        # for each comparison, verify dominant records
         for comp in theory.get_comparison_list():
-            dominant_recs, non_dominant_recs = partition(dominated_list, comp)
+            dominant_recs, non_dominant_recs = partition(dominant_recs, comp)
             temporary_list = temporary_list+non_dominant_recs
         return_list = return_list + dominant_recs
-        dominated_list = temporary_list
+        dominant_recs = temporary_list
     return return_list[0:k]

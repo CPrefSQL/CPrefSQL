@@ -21,16 +21,16 @@ if __name__ == '__main__':
         FILE = open(sys.argv[1])
         FILE_TEXT = FILE.read()
         PARSED = TheoryGrammar.parse(FILE_TEXT)
-        print 'Original string:'
-        print FILE_TEXT
-        print 'Parsed:'
-        print PARSED
+        print('Original string:')
+        print(FILE_TEXT)
+        print('Parsed:')
+        print(PARSED)
         if PARSED is not None:
-            print ''
-            print 'ParseResult object:'
+            print('')
+            print('ParseResult object:')
             for num, cprule in enumerate(PARSED):
                 print('rule ', num, cprule)
     except ParseException as parse_exception:
-        print 'Parse error:'
-        print parse_exception.line
-        print parse_exception
+        print('Parse error:')
+        print(parse_exception.line)
+        print(parse_exception)

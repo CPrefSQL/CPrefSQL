@@ -24,21 +24,21 @@ if __name__ == '__main__':
         FILE = open(sys.argv[1])
         FILE_TEXT = FILE.read()
         PARSED = TheoryGrammar.parse(FILE_TEXT)
-        print 'Original string:'
-        print FILE_TEXT
+        print('Original string:')
+        print(FILE_TEXT)
         if PARSED is not None:
-            print ''
-            print 'ParseResult object:'
+            print('')
+            print('ParseResult object:')
             for num, parsed_rule in enumerate(PARSED):
                 print('rule ', num, parsed_rule)
-            print 'CP-Rules'
+            print('CP-Rules')
             for num, parsed_rule in enumerate(PARSED):
                 cp_rule = CPRule(parsed_rule)
                 print('cp-rule ', num, cp_rule)
                 RULE_LIST.append(cp_rule)
         THEORY = CPTheory(RULE_LIST)
-        print 'Consistent: ', THEORY.is_consistency()
+        print('Consistent: ', THEORY.is_consistent())
     except ParseException as parse_exception:
-        print 'Parse error:'
-        print parse_exception.line
-        print parse_exception
+        print('Parse error:')
+        print(parse_exception.line)
+        print(parse_exception)

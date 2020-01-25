@@ -120,7 +120,7 @@ class CPTheory(object):
         # Combined formulas
         for atomic in atomic_formula_list:
             new_formula_list = []
-            att = atomic.keys()[0]
+            att = list(atomic.keys())[0]
             for formula in self._formula_list:
                 if att not in formula:
                     formula_copy = formula.copy()

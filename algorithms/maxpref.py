@@ -4,6 +4,8 @@
 Module with new algorithms
 '''
 
+from operator import itemgetter
+
 from preference.theory import build_cptheory
 from preference.comparison import _is_record_valid_by_formula
 
@@ -23,7 +25,7 @@ def get_maxpref_best(preference_text, record_list):
 
     # Get maximal formulas and sorted formula list
     sorted_list = theory.get_sorted_formulas()
-    print sorted_list
+
     max_formulas = theory.get_max_formulas()
 
     # List of records to be returned
@@ -90,7 +92,7 @@ def get_maxpref_topk(preference_text,  record_list, k):
                     # Append to result list
                     result_list.append(rec_level)
     # Sort records according to formula level
-    result_list.sort()
+    result_list.sort(key=itemgetter(0))
     # Remove formula level
     result_list = [tup[1] for tup in result_list]
     return result_list[:k]

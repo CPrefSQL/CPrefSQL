@@ -310,7 +310,7 @@ class CPRule(object):
                 return False
         # Check if all another attributes are equal except
         # Preference attribute and indifferent attributes
-        att_set = set(record1.keys() + record2.keys())
+        att_set = set(list(record1.keys()) + list(record2.keys()))
         att_set = att_set.difference(set([pref.get_preference_attribute()]))
         att_set = att_set.difference(pref.get_indifferent_set())
         for att in att_set:

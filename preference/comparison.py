@@ -33,17 +33,16 @@ class Comparison(object):
     def __repr__(self):
         return self.__str__()
 
-    def __cmp__(self, other):
+    def __lt__(self, other):
         len_self_indif = len(self.get_indifferent_set())
         len_other_indif = len(other.get_indifferent_set())
         if len_self_indif != len_other_indif:
-            return -1 * cmp(len(self.get_indifferent_set()),
-                            len(other.get_indifferent_set()))
+            return (len(self.get_indifferent_set())> len(other.get_indifferent_set()))
         len_self_form = len(self.get_preferred_formula()) + \
             len(self.get_notpreferred_formula())
         len_other_form = len(other.get_preferred_formula()) + \
             len(other.get_notpreferred_formula())
-        return cmp(len_self_form, len_other_form)
+        return not (len_self_form > len_other_form)
 
     def __eq__(self, other):
         return isinstance(self, Comparison) and \
