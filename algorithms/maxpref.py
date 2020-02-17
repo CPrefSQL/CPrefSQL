@@ -22,6 +22,8 @@ def get_maxpref_best(preference_text, record_list):
 
     # Build theory from preference text
     theory = build_cptheory(preference_text)
+    if not theory.is_consistent():
+        return []
 
     # Get maximal formulas and sorted formula list
     sorted_list = theory.get_sorted_formulas()
@@ -72,6 +74,8 @@ def get_maxpref_topk(preference_text,  record_list, k):
     '''
     # Build theory from preference text
     theory = build_cptheory(preference_text)
+    if not theory.is_consistent():
+        return []
     # Get maximal formulas and sorted formula list
     sorted_list = theory.get_sorted_formulas()
     max_formulas = theory.get_max_formulas()
