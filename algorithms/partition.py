@@ -34,7 +34,8 @@ def partition_best(theory, record_list):
     dominants = list(record_list)
     # for each comparison, verify dominant records
     for comp in theory.get_comparison_list():
-        dominants, _ = partition(dominants, comp)
+        dominants, _, non_comparable = partition(dominants, comp)
+        dominants = dominants + non_comparable
     return dominants
 
 
@@ -49,6 +50,7 @@ def partition(record_list, comparison):
     partition_table = create_partitions(record_list, comparison)
     dominant_list = []
     non_dominants_list = []
+    non_comparable_list = []
 
     # for each partition, separated the dominant records
     for part in partition_table:
@@ -64,11 +66,14 @@ def partition(record_list, comparison):
             else:
                 part_indifferent.append(rec)
         if part_dominant:
-            dominant_list += part_dominant+part_indifferent
+            dominant_list += part_dominant
             non_dominants_list += part_non_dominant
         else:
-            dominant_list += part_list
-    return dominant_list, non_dominants_list
+            dominant_list += part_non_dominant
+
+        non_comparable_list += part_indifferent
+
+    return dominant_list, non_dominants_list, non_comparable_list
 
 
 def get_partition_id(tup, attribute_set):
@@ -90,19 +95,21 @@ def create_partitions(tuple_list, comparison):
     attributes must be the same
     '''
     hash_table = {}
-    attribute_set = set(tuple_list[0].keys())
-    # ignore indifferent attributes
-    attribute_set = attribute_set.difference(comparison.get_indifferent_set())
-    if attribute_set:
-        hash_table[()] = tuple_list
-    else:
-        for tup in tuple_list:
-            # find partition id
-            p_id = get_partition_id(tup, attribute_set)
-            if p_id in hash_table:
-                hash_table[p_id].append(tup)
-            else:
-                hash_table[p_id] = [tup]
+    if len(tuple_list) > 0:
+        attribute_set = set(tuple_list[0].keys())
+        # ignore indifferent attributes
+        attribute_set = \
+            attribute_set.difference(comparison.get_indifferent_set())
+        if attribute_set:
+            hash_table[()] = tuple_list
+        else:
+            for tup in tuple_list:
+                # find partition id
+                p_id = get_partition_id(tup, attribute_set)
+                if p_id in hash_table:
+                    hash_table[p_id].append(tup)
+                else:
+                    hash_table[p_id] = [tup]
     return hash_table
 
 
@@ -135,8 +142,10 @@ def partition_topk(theory, record_list, k):
         temporary_list = []
         # for each comparison, verify dominant records
         for comp in theory.get_comparison_list():
-            dominant_recs, non_dominant_recs = partition(dominant_recs, comp)
-            temporary_list = temporary_list+non_dominant_recs
+            dominant_recs, non_dominant_recs, non_comparable = \
+                partition(dominant_recs, comp)
+            temporary_list = temporary_list + non_dominant_recs
+            dominant_recs = dominant_recs + non_comparable
         return_list = return_list + dominant_recs
         dominant_recs = temporary_list
     return return_list[0:k]
