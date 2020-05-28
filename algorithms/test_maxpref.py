@@ -14,7 +14,8 @@ sys.path.append(os.path.realpath(os.path.join(PATH, '..')))
 
 
 if __name__ == '__main__':
-    from algorithms.maxpref import get_maxpref_best, get_maxpref_topk
+    from algorithms.maxpref \
+        import get_mbest_partition, get_mtopk_partition
 
     if len(sys.argv) != 4:
         exit(0)
@@ -35,7 +36,7 @@ if __name__ == '__main__':
         print(dict(rec))
 
     print('\n\nBest records:')
-    BEST_LIST = get_maxpref_best(PREF_TEXT, REC_LIST)
+    BEST_LIST = get_mbest_partition(PREF_TEXT, REC_LIST)
     for rec in BEST_LIST:
         print(rec)
 
@@ -47,6 +48,6 @@ if __name__ == '__main__':
         print(dict(rec))
 
     print('\n\nTop-2 records:')
-    BEST_LIST = get_maxpref_topk(PREF_TEXT, REC_LIST, 2)
+    BEST_LIST = get_mtopk_partition(PREF_TEXT, REC_LIST, 2)
     for rec in BEST_LIST:
         print(rec)

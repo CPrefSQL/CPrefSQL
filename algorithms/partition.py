@@ -91,7 +91,7 @@ def get_partition_id(tup, attribute_set):
 def create_partitions(tuple_list, comparison):
     '''
     Build hash table from comparison and tuples
-    Tuples are grouped by "cetera paribus", so non-indifferent
+    Tuples are grouped by "cetera paribus" atributes, so non-indifferent
     attributes must be the same
     '''
     hash_table = {}
@@ -100,7 +100,7 @@ def create_partitions(tuple_list, comparison):
         # ignore indifferent attributes
         attribute_set = \
             attribute_set.difference(comparison.get_indifferent_set())
-        if attribute_set:
+        if not attribute_set:
             hash_table[()] = tuple_list
         else:
             for tup in tuple_list:

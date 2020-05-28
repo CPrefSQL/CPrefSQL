@@ -1,102 +1,92 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
-Module with new algorithms
+Module with extended partition algorithms for Maxpref CPref-SQL operators
 '''
 
-from operator import itemgetter
-
 from preference.theory import build_cptheory
-from preference.comparison import _is_record_valid_by_formula
+from partition import partition
 
 
-def get_maxpref_best(preference_text, record_list):
+def incomparable(comparisons, record_list):
+    non_comparables = record_list
+    comparables = []
+    for comp in comparisons:
+        dominants, non_dominants, non_comparables = \
+            partition(non_comparables, comp)
+        comparables += dominants + non_dominants
+    return comparables, non_comparables
+
+
+def get_mbest_partition(preference_text, record_list):
     '''
-    Get best (maximal) records according to CPTheory (MaxPref semantic)
-
-    A record is maximal if it is satisfies a formula F and there is
-    no other record that satisfies a formula better than F
-
-    It does modify the record list as it processes it
+    Get best records according to CPTheory (partition algorithm)
+    A record is best if it is not dominated by any other record
     '''
-
-    # Build theory from preference text
     theory = build_cptheory(preference_text)
     if not theory.is_consistent():
         return []
-
-    # Get maximal formulas and sorted formula list
-    sorted_list = theory.get_sorted_formulas()
-
-    max_formulas = theory.get_max_formulas()
-
-    # List of records to be returned
-    result_list = []
-    # Current formula level (anyone is smaller then plus infinity)
-    current_level = float("Inf")
-
-    # For each input record
-    for rec in record_list:
-        # Suppose no level changes
-        level_change = False
-        # For each sub_list of sorted formulas
-        for formula_level, formula_list in enumerate(sorted_list):
-            # For each formula in current formula level
-            for formula_id in formula_list:
-                # If record is satisfied by current formula
-                if _is_record_valid_by_formula(max_formulas[formula_id], rec):
-                    # If formula level is lower than current level
-                    if formula_level < current_level:
-                        # Change current level to formula level
-                        level_change = True
-                        current_level = formula_level
-                        # Create a new result list
-                        result_list = [rec]
-                    # If formula level is equal to current level
-                    elif formula_level == current_level:
-                        # Append record into current list
-                        result_list.append(rec)
-                    # No need to search for other formulas
-                    break
-        # If there is level change, we prune the sorted list
-        # We don't need formulas with higher levels
-        if level_change:
-            sorted_list = sorted_list[:current_level+1]
-    # If no one record match with the formulas, we return all input records
-    if len(result_list) == 0:
-        return record_list
-    return result_list
+    # Build formulas
+    theory.build_formulas()
+    # Build comparisons from formulas
+    theory.build_comparisons()
+    # Apply partition algorithm
+    result = partition_mbest(theory, record_list)
+    return result
 
 
-def get_maxpref_topk(preference_text,  record_list, k):
+def partition_mbest(theory, record_list):
     '''
-    Get top-k (maximal) records according to CPTheory (MaxPref semantic)
+    Get best records by partitioning the record list
+    based on each comparison and separating the dominant
+    records and discarding the dominated ones
     '''
-    # Build theory from preference text
+
+    dominants = list(record_list)
+    dominants, _ = incomparable(theory.get_comparison_list(), dominants)
+
+    # for each comparison, verify dominant records
+    for comp in theory.get_comparison_list():
+        dominants, _, non_comparables = partition(dominants, comp)
+        dominants = dominants + non_comparables
+    return dominants
+
+
+def get_mtopk_partition(preference_text, record_list, k):
+    '''
+    Returns the top-k records (partition algorithm)
+    '''
     theory = build_cptheory(preference_text)
     if not theory.is_consistent():
         return []
-    # Get maximal formulas and sorted formula list
-    sorted_list = theory.get_sorted_formulas()
-    max_formulas = theory.get_max_formulas()
-    # List of records to be returned
-    result_list = []
+    # Build formulas
+    theory.build_formulas()
+    # Build comparisons
+    theory.build_comparisons()
+    # Apply algorithm
+    result = partition_mtopk(theory, record_list, k)
+    return result
 
-    # because no sorting is required
-    # For each input record
-    for rec in record_list:
-        # For each sub_list of sorted formulas
-        for formula_level, formula_list in enumerate(sorted_list):
-            # For each formula in current formula level
-            for formula_id in formula_list:
-                # If record is satisfied by current formula
-                if _is_record_valid_by_formula(max_formulas[formula_id], rec):
-                    # Label the record with formula level
-                    rec_level = (formula_level, rec)
-                    # Append to result list
-                    result_list.append(rec_level)
-    # Sort records according to formula level
-    result_list.sort(key=itemgetter(0))
-    # Remove formula level
-    result_list = [tup[1] for tup in result_list]
-    return result_list[:k]
+
+def partition_mtopk(theory, record_list, k):
+    '''
+    Separate the top-k most dominant tuples
+    The algorithm repeatedly scans the set of dominated tuples
+    progressively populating the return list
+    '''
+    # initially assumes all dominant
+    return_list = []
+    dominant_recs = list(record_list)
+    dominant_recs, _ = \
+        incomparable(theory.get_comparison_list(), dominant_recs)
+
+    while len(return_list) < k and dominant_recs:
+        temporary_list = []
+        # for each comparison, verify dominant records
+        for comp in theory.get_comparison_list():
+            dominant_recs, non_dominant_recs, non_comparable = \
+                partition(dominant_recs, comp)
+            temporary_list = temporary_list + non_dominant_recs
+            dominant_recs = dominant_recs + non_comparable
+        return_list = return_list + dominant_recs
+        dominant_recs = temporary_list
+    return return_list[0:k]

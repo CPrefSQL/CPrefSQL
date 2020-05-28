@@ -1,9 +1,7 @@
 eclipse.preferences.version=1
-encoding//algorithms/extended_partition.py=utf-8
 encoding//algorithms/maxpref.py=utf-8
 encoding//algorithms/nested_loops.py=utf-8
 encoding//algorithms/partition.py=utf-8
-encoding//algorithms/test_extended_partition.py=utf-8
 encoding//algorithms/test_maxpref.py=utf-8
 encoding//algorithms/test_nested_loops.py=utf-8
 encoding//algorithms/test_partition.py=utf-8
