@@ -1,0 +1,5 @@
+IF (tela >= 5) THEN (marca = 'Samsung') > (marca = 'Motorola')
+AND
+(marca = 'Apple') > (marca = 'Samsung')
+AND
+IF (ram > 3) THEN (marca = 'Motorola') > (marca = 'Apple')

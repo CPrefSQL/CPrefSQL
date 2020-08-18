@@ -38,6 +38,11 @@ if __name__ == '__main__':
                 RULE_LIST.append(cp_rule)
         THEORY = CPTheory(RULE_LIST)
         print('Consistent: ', THEORY.is_consistent())
+
+        # Warning, rule rewriting changes theory
+        THEORY.split_rules()
+        print('Consistent under rewriting: ',
+              THEORY.is_consistent_rule_rewriting())
     except ParseException as parse_exception:
         print('Parse error:')
         print(parse_exception.line)

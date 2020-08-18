@@ -4,7 +4,8 @@ Module to manipulate conditional preference rules (cp-rules)
 '''
 
 from grammar.symbols import IF_SYM, THEN_SYM
-from preference.interval import get_str_predicate, intersect
+from preference.interval import get_str_predicate, intersect, \
+    split_neq_interval, split_interval
 
 
 # TODO: Join in a single class
@@ -36,6 +37,8 @@ class CPCondition(object):
         '''
         copy_cond = CPCondition(None)
         copy_cond.__dict__.update(self.__dict__)
+        copy_cond._condition_dict = self._condition_dict.copy()
+
         return copy_cond
 
     def get_condition_dict(self):
@@ -138,6 +141,24 @@ class CPPreference(object):
         '''
         return self._indifferent_attribute_set
 
+    def set_best_interval(self, interval):
+        '''
+        Get preferred value for preference attribute
+        '''
+        self._best_interval = interval
+
+    def set_worst_interval(self, interval):
+        '''
+        Get non preferred value for preference attribute
+        '''
+        self._worst_interval = interval
+
+    def set_indifferent_set(self, ind_set):
+        '''
+        Get indifferent attribute set
+        '''
+        self._indifferent_attribute_set = ind_set
+
     def is_best_satisfied_by(self, record):
         '''
         Check if a record satisfies the best interval
@@ -172,12 +193,13 @@ class CPRule(object):
         # Rule Preference
         self._preference = None
         # Initialize rule condition
-        if parsed_rule.condition:
-            self._condition = CPCondition(parsed_rule.condition)
-        # Initialize rule preference
-        self._preference = CPPreference(parsed_rule.best,
-                                        parsed_rule.worst,
-                                        parsed_rule.indifferent)
+        if parsed_rule:
+            if parsed_rule.condition:
+                self._condition = CPCondition(parsed_rule.condition)
+            # Initialize rule preference
+            self._preference = CPPreference(parsed_rule.best,
+                                            parsed_rule.worst,
+                                            parsed_rule.indifferent)
 
     def __str__(self):
         rule_str = ''
@@ -226,6 +248,9 @@ class CPRule(object):
         '''
         copy_rule = CPRule(None)
         copy_rule.__dict__.update(self.__dict__)
+        if self._condition:
+            copy_rule._condition = self._condition.copy()
+        copy_rule._preference = self._preference.copy()
         return copy_rule
 
     def change_record(self, record):
@@ -320,6 +345,96 @@ class CPRule(object):
                 return False
         return True
 
+    def split_neq_rule(self):
+        """
+        Split 'self' if there is neq intervals in
+        some attribute of 'self'
+        """
+        # Try neq split on antecedent intervals of 'rule'
+        if self.get_condition():
+            condition_set = self.get_condition().get_condition_dict()
+            for att in condition_set:
+                fixed_interval = condition_set[att]
+                new_intervals = split_neq_interval(fixed_interval)
+                new_rules_list = []
+
+                if(new_intervals != []):
+                    new_rule1 = self.copy()
+                    new_rule2 = self.copy()
+
+                    new_rule1.get_condition().get_condition_dict()[att] = \
+                        new_intervals[0]
+                    new_rule2.get_condition().get_condition_dict()[att] = \
+                        new_intervals[1]
+
+                    new_rules_list.append(new_rule1)
+                    new_rules_list.append(new_rule2)
+
+                if new_rules_list != []:
+                    return new_rules_list
+
+        # Try neq split on preferred interval of 'rule'
+        new_rules_list = []
+        fixed_interval = self.get_preference().get_best_interval()
+        new_intervals = split_neq_interval(fixed_interval)
+
+        if(new_intervals != []):
+            new_rule1 = self.copy()
+            new_rule2 = self.copy()
+
+            new_rule1.get_preference().set_best_interval(new_intervals[0])
+            new_rule2.get_preference().set_best_interval(new_intervals[1])
+
+            new_rules_list.append(new_rule1)
+            new_rules_list.append(new_rule2)
+
+        if new_rules_list == []:
+            # Try neq split not preferred interval of 'rule'
+            fixed_interval = self.get_preference().get_worst_interval()
+            new_intervals = split_neq_interval(fixed_interval)
+
+            if(new_intervals != []):
+                new_rule1 = self.copy()
+                new_rule2 = self.copy()
+
+                new_rule1.get_preference().set_worst_interval(new_intervals[0])
+                new_rule2.get_preference().set_worst_interval(new_intervals[1])
+
+                new_rules_list.append(new_rule1)
+                new_rules_list.append(new_rule2)
+
+        return new_rules_list
+
+    def split_rule(self, rule):
+        """
+        Split 'self' if there is attribute with intervals that
+        intersect with given interval
+        """
+        # Try split on conditions intervals of 'rule'
+        if rule.get_condition():
+            conditions = rule.get_condition().get_condition_dict()
+            for att in conditions.keys():
+                interval = conditions[att]
+                new_rules_list = \
+                    split_rule_over_condition_attribute(self, att, interval)
+                if new_rules_list != []:
+                    return new_rules_list
+
+        # Try split on preferred interval of 'rule'
+        new_rules_list = []
+        preference = rule.get_preference()
+        new_rules_list = \
+            split_rule_preferred(self, preference.get_preference_attribute(),
+                                 preference.get_best_interval())
+
+        if(new_rules_list == []):
+            # Try split not preferred interval of 'rule'
+            new_rules_list = \
+                split_rule_not_preferred(self,
+                                         preference.get_preference_attribute(),
+                                         preference.get_worst_interval())
+        return new_rules_list
+
 
 def is_dict_satisfied_by(condition_dict, record):
     '''
@@ -331,3 +446,82 @@ def is_dict_satisfied_by(condition_dict, record):
                 not intersect(interval, record[att]):
             return False
     return True
+
+
+def split_rule_preferred(rule, att, interval):
+    """
+    Split rule if fixed_interval interval overlaps preferred interval
+    """
+    new_rules_list = []
+    if rule.get_preference().get_preference_attribute() != att:
+        return new_rules_list
+
+    # Get preferred interval
+    rule_int = rule.get_preference().get_best_interval()
+
+    # Check if intervals intersect
+    if (rule_int != interval) and (intersect(rule_int, interval)):
+        # Split intervals
+        new_intervals_list = split_interval(rule_int, interval)
+
+        # Add new rules with new intervals
+        for new_interval in new_intervals_list:
+            new_rule = rule.copy()
+            new_rule.get_preference().set_best_interval(new_interval)
+            new_rules_list.append(new_rule)
+    return new_rules_list
+
+
+def split_rule_not_preferred(rule, att, interval):
+    """
+    Split rule if not preferred interval overlaps between rules
+    """
+
+    new_rules_list = []
+    if rule.get_preference().get_preference_attribute() != att:
+        return new_rules_list
+
+    # Get not preferred interval
+    rule_int = rule.get_preference().get_worst_interval()
+
+    # Check if intervals intersect
+    if (rule_int != interval) and (intersect(rule_int, interval)):
+        # Split intervals
+        new_intervals_list = split_interval(rule_int, interval)
+
+        # Add new rules with new intervals
+        for new_interval in new_intervals_list:
+            new_rule = rule.copy()
+            new_rule.get_preference().set_worst_interval(new_interval)
+            new_rules_list.append(new_rule)
+    return new_rules_list
+
+
+def split_rule_over_condition_attribute(rule, att, interval):
+    """
+    Split rule if rule intersects interval over any attribute
+    on conditions
+    """
+    new_rules_list = []
+
+    # Get attribute intervals
+    if not rule.get_condition():
+        return new_rules_list
+
+    if att not in rule.get_condition().get_condition_dict().keys():
+        return new_rules_list
+
+    rule_int = rule.get_condition().get_condition_dict()[att]
+
+    # Verify if intervals intersect
+    if (rule_int != interval) and (intersect(rule_int, interval)):
+        # Split intervals
+        new_intervals_list = split_interval(rule_int, interval)
+
+        # Add new rules with new intervals
+        for new_interval in new_intervals_list:
+            new_rule = rule.copy()
+            new_rule.get_condition().get_condition_dict()[att] = (new_interval)
+            new_rules_list.append(new_rule)
+
+    return new_rules_list

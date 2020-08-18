@@ -113,13 +113,17 @@ def _interval_intersect(interval1, interval2):
 
 def _after(value1, value2):
     '''
-    Check if value1 is after value2
+    Check if value2 is after value1
     '''
-    # Check if value1 is +infinite (nothing can be after +infinite)
-    if value1 == PLUS_INF:
+    # Check if value2 is +infinite (nothing can be after +infinite)
+    if value2 == PLUS_INF:
         return False
     # Check if value2 is +infinite and value1 is not +infinite
-    if value2 == PLUS_INF and value1 != PLUS_INF:
+    if value1 == PLUS_INF and value2 != PLUS_INF:
+        return True
+    if value1 == MINUS_INF:
+        return False
+    if value2 == MINUS_INF and value1 != MINUS_INF:
         return True
     return value1 > value2
 
@@ -128,11 +132,16 @@ def _before(value1, value2):
     '''
     Check if value1 appears before value 2
     '''
-    # Check if value1 is -infinite (nothing can be before -infinite)
-    if value1 == MINUS_INF:
+    # Check if value2 is -infinite (nothing can be before -infinite)
+    if value2 == MINUS_INF:
         return False
-    if value2 == MINUS_INF and value1 != MINUS_INF:
+    if value1 == MINUS_INF and value2 != MINUS_INF:
         return True
+    if value1 == PLUS_INF:
+        return False
+    if value2 == PLUS_INF and value1 != PLUS_INF:
+        return True
+
     return value1 < value2
 
 
@@ -212,3 +221,205 @@ def get_str_predicate(attribute, interval):
     '''
     return str(interval[0]) + interval[1] + attribute + interval[2] + \
         str(interval[3])
+
+
+def split_neq_interval(interval):
+    '''
+        Split interval in the form ( Value, '<>', '<>', Value)
+        to two intervals:
+            ('-inf','<=', '<', Value)
+            (Value, '<', '<=', '+inf')
+    '''
+    interval_list = []
+
+    # verify if it's neq interval
+    if (interval[1] == DIFFERENT_OP) and (interval[2] == DIFFERENT_OP):
+        interval1 = (MINUS_INF, LESS_EQUAL_OP, LESS_OP, interval[0])
+        interval2 = (interval[0], LESS_OP, LESS_EQUAL_OP, PLUS_INF)
+        interval_list.append(interval1)
+        interval_list.append(interval2)
+
+    return interval_list
+
+
+def _left_equal(interval1, interval2):
+    """
+    Check if 'interval1' left limit is equal 'interval2' left limit
+    """
+    if interval1[1] == interval2[1] and interval1[0] == interval2[0]:
+        return True
+    elif interval1[1] in ('=', '<=') and interval2[1] in ('=', '<=') \
+            and interval1[0] == interval2[0]:
+        return True
+    else:
+        return False
+
+
+def _right_equal(interval1, interval2):
+    """
+    Check if 'interval1' right limit is equal 'interval2' right limit
+    """
+    if interval1[2] == interval2[2] and interval1[3] == interval2[3]:
+        return True
+    elif interval1[2] in ('=', '<=') and interval2[2] in ('=', '<=') \
+            and interval1[3] == interval2[3]:
+        return True
+    else:
+        return False
+
+
+def _left_after(interval1, interval2):
+    """
+    Check if 'interval1' left limit is after 'interval2' left limit
+    """
+    # interval1: |---
+    # interval2: <---
+    if interval2[0] == MINUS_INF and interval1[0] != MINUS_INF:
+        return True
+    # interval1:  |---
+    # interval2: |---
+    elif interval2[1] in ('<', '<=') and interval1[1] in ('<', '<=', '=') \
+            and interval2[0] < interval1[0]:
+        return True
+    # interval1: []---
+    # interval2:  |---
+    elif interval2[1] == '<=' and interval1[1] == '<' \
+            and interval2[0] == interval1[0]:
+        return True
+    else:
+        return False
+
+
+def _right_before(interval1, interval2):
+    """
+    Check if 'interval1' right limit is before 'interval2' right limit
+    """
+    # interval1: ---|
+    # interval2: --->
+    if interval2[3] == PLUS_INF and interval1[3] != PLUS_INF:
+        return True
+    # interval1: ---|
+    # interval2:  ---|
+    elif interval2[2] in ('<', '<=') and interval1[2] in ('<', '<=', '=') \
+            and interval2[3] > interval1[3]:
+        return True
+    # interval1: ---[]
+    # interval2: ---|
+    elif interval2[2] == '<=' and interval1[2] == '<' \
+            and interval2[3] == interval1[3]:
+        return True
+    else:
+        return False
+
+
+def _right_after_equal_left(interval1, interval2):
+    """
+    Check if 'interval1' right limit is after or equal 'interval2' left limit
+    """
+    # interval1: ---|
+    # interval2:  |---
+    if interval1[3] != PLUS_INF and interval2[0] != MINUS_INF \
+            and interval1[3] > interval2[0]:
+        return True
+    # interval1: ---|
+    # interval2: <---
+    elif interval1[3] != PLUS_INF and interval2[0] == MINUS_INF:
+        return True
+    # interval1: --->
+    # interval2:  |---
+    elif interval1[3] == PLUS_INF and interval2[0] != MINUS_INF:
+        return True
+    # interval1: ---|
+    # interval2:    |---
+    elif interval1[2] in ('<=', '=') and interval2[1] in ('=', '<=') \
+            and interval1[3] == interval2[0]:
+        return True
+    else:
+        return False
+
+
+def split_interval(split_interval, fixed_interval):
+    """
+    Split 'split_interval' if 'fixed_interval' overlaps 'split_interval'
+    """
+    new_interval_list = []
+
+    # Get part of 'fixed_interval' that overlaps 'split_interval'
+    # First possibility, 'fixed_interval' inside
+    # (at least one side) 'split_interval'
+    # just copy fixed_interval
+
+    #                   fixed_interval:   |--|
+    #                   split_interval: |------|
+    # split_interval' = fixed_interval:   |--|
+    if _left_after(fixed_interval, split_interval) \
+            and _right_before(fixed_interval, split_interval):
+        new_interval_list.append(fixed_interval)
+
+    #                   split_interval: |------|
+    #                   fixed_interval: |--|
+    # split_interval' = fixed_interval: |--|
+    elif _left_equal(fixed_interval, split_interval) \
+            and _right_before(fixed_interval, split_interval):
+        new_interval_list.append(fixed_interval)
+    #          fixed_interval:    |--|
+    #          split_interval: |-----|
+    # split_interval' = fixed_interval:    |--|
+    elif _left_after(fixed_interval, split_interval) \
+            and _right_equal(fixed_interval, split_interval):
+        new_interval_list.append(fixed_interval)
+
+    # Second possibility, 'fixed_interval' right limit
+    # overlaps 'split_interval' left limit
+
+    #  fixed_interval: ----|
+    #  split_interval:  |-----
+    # split_interval':  |--|
+    elif _right_after_equal_left(fixed_interval, split_interval) \
+            and _right_before(fixed_interval, split_interval):
+        new_interval_list.append((split_interval[0], split_interval[1],
+                                  fixed_interval[2], fixed_interval[3]))
+
+    # Third possibility, 'fixed_interval' left limit
+    # overlaps 'split_interval' right limit
+
+    #  fixed_interval:  |-----
+    #  split_interval: ----|
+    # split_interval':  |--|
+    elif _right_after_equal_left(split_interval, fixed_interval) \
+            and _left_after(fixed_interval, split_interval):
+        new_interval_list.append((fixed_interval[0], fixed_interval[1],
+                                  split_interval[2], split_interval[3]))
+
+    # Get part of 'split_interval' before 'fixed_interval'
+    #  fixed_interval:   |----
+    #  split_interval: -----|
+    # split_interval': --|
+    if _right_after_equal_left(split_interval, fixed_interval) \
+            and _left_after(fixed_interval, split_interval):
+        if fixed_interval[1] in ('=', '<='):
+            new_interval_list.append((split_interval[0], split_interval[1],
+                                      '<', fixed_interval[0]))
+        else:
+            new_interval_list.append((split_interval[0], split_interval[1],
+                                      '<=', fixed_interval[0]))
+
+    # Get part of 'split_interval' after 'fixed_interval'
+    #  fixed_interval: ----|
+    #  split_interval:  |-----
+    # split_interval':     |--
+    if _right_after_equal_left(fixed_interval, split_interval) \
+            and _right_before(fixed_interval, split_interval):
+        if fixed_interval[2] in ('=', '<='):
+            new_interval_list.append((fixed_interval[3], '<',
+                                      split_interval[2], split_interval[3]))
+        else:
+            new_interval_list.append((fixed_interval[3], '<=',
+                                      split_interval[2], split_interval[3]))
+
+    interval_list = []
+    for interval in new_interval_list:
+        if interval[0] == interval[3]:
+            interval = (interval[0], '=', '=', interval[3])
+        interval_list.append(interval)
+    return interval_list

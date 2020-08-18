@@ -48,6 +48,18 @@ class CPTheory(object):
             return True
         return False
 
+    def is_consistent_rule_rewriting(self):
+        '''
+        Check theory consistency
+        Rule rewriting
+        '''
+
+        # check first global consistency and then local consistency
+        if self._is_global_consistent() \
+                and self._is_local_consistent_rule_rewriting():
+            return True
+        return False
+
     def _is_global_consistent(self):
         '''
         Check global consistency of theory
@@ -91,6 +103,25 @@ class CPTheory(object):
     def _is_local_consistent(self):
         '''
         Check if theory is local consistent
+
+        A theory is local inconsistent if there are a set of compatible rules
+        such that an interval is preferred than itself
+        '''
+        # build sets of compatible rules
+        for rule_set in self._get_compatible_sets():
+            # build graph with rule sets
+            rule_list = [self._rule_list[index] for index in rule_set]
+            graph = _build_interval_graph(rule_list)
+
+            # verify that there are no cycles on the graph created
+            if not graph.is_acyclic():
+                return False
+        return True
+
+    def _is_local_consistent_rule_rewriting(self):
+        '''
+        Check if theory is local consistent
+        under the scheme or rule rewriting
 
         A theory is local inconsistent if there are a set of compatible rules
         such that an interval is preferred than itself
@@ -343,6 +374,68 @@ class CPTheory(object):
         sorted_list = graph.get_topological_list()
 
         return sorted_list
+
+    def split_rules(self):
+        """
+        Searches for rules with intersection in intervals.
+        When that found, new rules are generated with disjoint intervals.
+        Also split neq intervals
+        Example:
+            - Two intersected intervals: (1 < A < 9) and (2 < A < 10)
+            - Three three new intervals: (1 < A <= 2) and (2 < A < 9)
+        The original number of rules can be increased
+        """
+
+        # first break neq intervals
+        while True:
+            # List of new rules
+            new_rules_list = []
+            # Get a rule
+            for rule in self._rule_list:
+                # 'new_rules_list' is rules originated by
+                # 'rule' with split in neq intervals
+                new_rules_list = rule.split_neq_rule()
+
+                # Check if there was split in 'rule' intervals
+                # Restart iteration
+                if new_rules_list:
+                    # Remove original rule
+                    self._rule_list.remove(rule)
+                    break
+
+            # Check if there was split in intervals
+            if new_rules_list:
+                # Add new rules
+                self._rule_list += new_rules_list
+            else:
+                # Stop, when there wasn't split
+                break
+
+        # split rules where intersections happen
+        while True:
+            # List of new rules
+            new_rules_list = []
+            # Get pair of rules
+            for cpr1 in self._rule_list:
+                for cpr2 in self._rule_list:
+                    # 'new_rules_list' is rules originated by
+                    # 'cpr1' with split in intervals by 'cpr2'
+                    new_rules_list = cpr1.split_rule(cpr2)
+                    # Check if there was split in 'cpr1' intervals
+                    if new_rules_list:
+                        # Remove original rule
+                        self._rule_list.remove(cpr1)
+                        break
+                # Restart iteration
+                if new_rules_list:
+                    break
+            # Check if there was split in intervals
+            if new_rules_list:
+                # Add new rules
+                self._rule_list += new_rules_list
+            else:
+                # Stop, when there wasn't split
+                break
 
 
 def _build_interval_graph(rule_list):
