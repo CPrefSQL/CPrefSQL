@@ -40,17 +40,6 @@ class CPTheory(object):
     def is_consistent(self):
         '''
         Check theory consistency
-        '''
-
-        # check first global consistency and then local consistency
-        if self._is_global_consistent() \
-                and self._is_local_consistent():
-            return True
-        return False
-
-    def is_consistent_rule_rewriting(self):
-        '''
-        Check theory consistency
         Rule rewriting
         '''
 
@@ -58,6 +47,8 @@ class CPTheory(object):
         if self._is_global_consistent() \
                 and self._is_local_consistent_rule_rewriting():
             return True
+        return False
+
         return False
 
     def _is_global_consistent(self):
@@ -100,9 +91,10 @@ class CPTheory(object):
                 rules_list.append(rule)
         return rules_list
 
-    def _is_local_consistent(self):
+    def _is_local_consistent_rule_rewriting(self):
         '''
         Check if theory is local consistent
+        under the scheme or rule rewriting
 
         A theory is local inconsistent if there are a set of compatible rules
         such that an interval is preferred than itself
@@ -118,11 +110,10 @@ class CPTheory(object):
                 return False
         return True
 
-    def _is_local_consistent_rule_rewriting(self):
+    def _is_local_consistent(self):
         '''
         Check if theory is local consistent
-        under the scheme or rule rewriting
-
+        <DEPRECATED>
         A theory is local inconsistent if there are a set of compatible rules
         such that an interval is preferred than itself
         '''
@@ -202,8 +193,14 @@ class CPTheory(object):
                     for rule in self._rule_list:
                         # Check if formula1 dominates formula2
                         if rule.dominates(formula1, formula2):
-                            comp = build_comparison(formula1, formula2, rule)
-                            tmp_set.add(comp)
+                            # Screen for intersections
+                            att = \
+                                rule.get_preference()\
+                                .get_preference_attribute()
+                            if not intersect(formula1[att], formula2[att]):
+                                comp = \
+                                    build_comparison(formula1, formula2, rule)
+                                tmp_set.add(comp)
                 comp_dict[idx1][idx2] = tmp_set
         self._build_transitive_comparisons(comp_dict)
 

@@ -46,7 +46,7 @@ if __name__ == '__main__':
         REC_LIST.append(dict(rec))
         print(dict(rec))
 
-    print('\n\nTop-2 records:')
-    BEST_LIST = get_topk_partition(PREF_TEXT, REC_LIST, 2)
+    print('\n\nTop-3 records:')
+    BEST_LIST = get_topk_partition(PREF_TEXT, REC_LIST, 3)
     for rec in BEST_LIST:
         print(rec)

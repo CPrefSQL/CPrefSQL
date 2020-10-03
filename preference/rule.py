@@ -8,7 +8,6 @@ from preference.interval import get_str_predicate, intersect, \
     split_neq_interval, split_interval
 
 
-# TODO: Join in a single class
 class CPCondition(object):
     '''
     Class to represent rule condition
@@ -410,8 +409,9 @@ class CPRule(object):
         Split 'self' if there is attribute with intervals that
         intersect with given interval
         """
-        # Try split on conditions intervals of 'rule'
+        # Try split on conditions intervals of 'self'
         if rule.get_condition():
+            # Search on condition
             conditions = rule.get_condition().get_condition_dict()
             for att in conditions.keys():
                 interval = conditions[att]
@@ -420,20 +420,77 @@ class CPRule(object):
                 if new_rules_list != []:
                     return new_rules_list
 
-        # Try split on preferred interval of 'rule'
+        # Try split of preference of 'rule' on condition of 'self'
+        preference = rule.get_preference()
+        att = preference.get_preference_attribute()
+        interval = preference.get_best_interval()
+        new_rules_list = \
+            split_rule_over_condition_attribute(self, att, interval)
+        if new_rules_list != []:
+            return new_rules_list
+
+        # Try split of non preference of 'rule' on condition of 'self'
+        interval = preference.get_worst_interval()
+        new_rules_list = \
+            split_rule_over_condition_attribute(self, att, interval)
+        if new_rules_list != []:
+            return new_rules_list
+
+        # Try split on preferred interval of 'self'
+        if rule.get_condition():
+            conditions = rule.get_condition().get_condition_dict()
+            for att in conditions.keys():
+                interval = conditions[att]
+                new_rules_list = \
+                    split_rule_preferred(self, att, interval)
+                if new_rules_list != []:
+                    return new_rules_list
+
+        # Try split of preference of 'rule' on preference of 'self'
         new_rules_list = []
         preference = rule.get_preference()
         new_rules_list = \
             split_rule_preferred(self, preference.get_preference_attribute(),
                                  preference.get_best_interval())
+        if new_rules_list != []:
+            return new_rules_list
 
-        if(new_rules_list == []):
-            # Try split not preferred interval of 'rule'
-            new_rules_list = \
-                split_rule_not_preferred(self,
-                                         preference.get_preference_attribute(),
-                                         preference.get_worst_interval())
-        return new_rules_list
+        # Try split of non preference of 'rule' on preference of 'self'
+        new_rules_list = \
+            split_rule_preferred(self, preference.get_preference_attribute(),
+                                 preference.get_worst_interval())
+        if new_rules_list != []:
+            return new_rules_list
+
+        # Try split not preferred interval of 'self'
+        if rule.get_condition():
+            conditions = rule.get_condition().get_condition_dict()
+            for att in conditions.keys():
+                interval = conditions[att]
+                new_rules_list = \
+                    split_rule_not_preferred(self, att, interval)
+                if new_rules_list != []:
+                    return new_rules_list
+
+        # Try split of preference of 'rule' on non preference of 'self'
+        new_rules_list = []
+        preference = rule.get_preference()
+        new_rules_list = \
+            split_rule_not_preferred(self,
+                                     preference.get_preference_attribute(),
+                                     preference.get_best_interval())
+        if new_rules_list != []:
+            return new_rules_list
+
+        # Try split of preference of 'rule' on non preference of 'self'
+        new_rules_list = \
+            split_rule_not_preferred(self,
+                                     preference.get_preference_attribute(),
+                                     preference.get_worst_interval())
+        if new_rules_list != []:
+            return new_rules_list
+
+        return []
 
 
 def is_dict_satisfied_by(condition_dict, record):
@@ -446,6 +503,36 @@ def is_dict_satisfied_by(condition_dict, record):
                 not intersect(interval, record[att]):
             return False
     return True
+
+
+def split_rule_over_condition_attribute(rule, att, interval):
+    """
+    Split rule if rule intersects interval over any attribute
+    on conditions
+    """
+    new_rules_list = []
+
+    # Get attribute intervals
+    if not rule.get_condition():
+        return new_rules_list
+
+    if att not in rule.get_condition().get_condition_dict().keys():
+        return new_rules_list
+
+    rule_int = rule.get_condition().get_condition_dict()[att]
+
+    # Verify if intervals intersect
+    if (rule_int != interval) and (intersect(rule_int, interval)):
+        # Split intervals
+        new_intervals_list = split_interval(rule_int, interval)
+
+        # Add new rules with new intervals
+        for new_interval in new_intervals_list:
+            new_rule = rule.copy()
+            new_rule.get_condition().get_condition_dict()[att] = (new_interval)
+            new_rules_list.append(new_rule)
+
+    return new_rules_list
 
 
 def split_rule_preferred(rule, att, interval):
@@ -494,34 +581,4 @@ def split_rule_not_preferred(rule, att, interval):
             new_rule = rule.copy()
             new_rule.get_preference().set_worst_interval(new_interval)
             new_rules_list.append(new_rule)
-    return new_rules_list
-
-
-def split_rule_over_condition_attribute(rule, att, interval):
-    """
-    Split rule if rule intersects interval over any attribute
-    on conditions
-    """
-    new_rules_list = []
-
-    # Get attribute intervals
-    if not rule.get_condition():
-        return new_rules_list
-
-    if att not in rule.get_condition().get_condition_dict().keys():
-        return new_rules_list
-
-    rule_int = rule.get_condition().get_condition_dict()[att]
-
-    # Verify if intervals intersect
-    if (rule_int != interval) and (intersect(rule_int, interval)):
-        # Split intervals
-        new_intervals_list = split_interval(rule_int, interval)
-
-        # Add new rules with new intervals
-        for new_interval in new_intervals_list:
-            new_rule = rule.copy()
-            new_rule.get_condition().get_condition_dict()[att] = (new_interval)
-            new_rules_list.append(new_rule)
-
     return new_rules_list

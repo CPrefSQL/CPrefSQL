@@ -23,6 +23,7 @@ def get_mbest_partition(preference_text, record_list):
     A record is best if it is not dominated by any other record
     '''
     theory = build_cptheory(preference_text)
+    theory.split_rules()
     if not theory.is_consistent():
         return []
     # Build formulas
@@ -56,6 +57,7 @@ def get_mtopk_partition(preference_text, record_list, k):
     Returns the top-k records (partition algorithm)
     '''
     theory = build_cptheory(preference_text)
+    theory.split_rules()
     if not theory.is_consistent():
         return []
     # Build formulas

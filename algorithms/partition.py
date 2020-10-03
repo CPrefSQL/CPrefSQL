@@ -13,7 +13,9 @@ def get_best_partition(preference_text, record_list):
     A record is best if it is not dominated by any other record
     '''
     theory = build_cptheory(preference_text)
+    theory.split_rules()
     if not theory.is_consistent():
+        print('inconsistent!')
         return []
     # Build formulas
     theory.build_formulas()
@@ -118,6 +120,7 @@ def get_topk_partition(preference_text, record_list, k):
     Returns the top-k records (partition algorithm)
     '''
     theory = build_cptheory(preference_text)
+    theory.split_rules()
     if not theory.is_consistent():
         return []
     # Build formulas
@@ -135,6 +138,7 @@ def partition_topk(theory, record_list, k):
     The algorithm repeatedly scans the set of dominated tuples
     progressively populating the return list
     '''
+
     # initially assumes all dominant
     return_list = []
     dominant_recs = list(record_list)
@@ -144,6 +148,7 @@ def partition_topk(theory, record_list, k):
         for comp in theory.get_comparison_list():
             dominant_recs, non_dominant_recs, non_comparable = \
                 partition(dominant_recs, comp)
+
             temporary_list = temporary_list + non_dominant_recs
             dominant_recs = dominant_recs + non_comparable
         return_list = return_list + dominant_recs

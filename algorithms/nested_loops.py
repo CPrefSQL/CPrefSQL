@@ -61,6 +61,7 @@ def get_best(preference_text, record_list):
     '''
     # build theory
     theory = build_cptheory(preference_text)
+    theory.split_rules()
     if not theory.is_consistent():
         return []
     result, _ = get_best_and_worst(theory, record_list)
@@ -73,6 +74,7 @@ def get_topk(preference_text, record_list, k):
     '''
     # build theory
     theory = build_cptheory(preference_text)
+    theory.split_rules()
     if not theory.is_consistent():
         return []
     worst_list = record_list

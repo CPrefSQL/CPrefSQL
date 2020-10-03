@@ -66,7 +66,8 @@ class Graph(object):
             # Get next vertex
             next_vertex = waiting_list.pop()
             # Check if 'goal_vertex' was reached
-            if intersect(goal_vertex, next_vertex):
+            # Must be equality test
+            if goal_vertex == next_vertex:
                 return True
             # Check if 'next_vertex' was be visited
             if next_vertex not in visited_list:
@@ -81,6 +82,7 @@ class Graph(object):
         '''
         Check if the graph is acyclic
         '''
+
         # Call depth first search form each vertex to itself
         for vertex in self._graph_dict:
             if self.depth_first_search(vertex, vertex):
